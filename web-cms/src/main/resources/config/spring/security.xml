@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/security
+                           http://www.springframework.org/schema/security/spring-security.xsd">
+	<security:http security="none" pattern="/assets/**" />
+
+	<security:http auto-config="true"
+	               use-expressions="false"
+	               create-session="never"
+	               authentication-manager-ref="authenticationManager">
+		<security:intercept-url pattern="/main*" access="ROLE_ROOT,ROLE_GENERAL,ROLE_MANAGER" />
+		<security:intercept-url pattern="/transcription/**" access="ROLE_ROOT,ROLE_GENERAL,ROLE_MANAGER" />
+		<security:intercept-url pattern="/mypage/**" access="ROLE_ROOT,ROLE_GENERAL,ROLE_MANAGER" />
+		<security:intercept-url pattern="/manage/**" access="ROLE_ROOT,ROLE_MANAGER" />
+		<security:intercept-url pattern="/code/**" access="ROLE_ROOT,ROLE_MANAGER" />
+
+		<security:csrf token-repository-ref="csrfTokenRepository" />
+
+		<!-- 로그인 페이지 -->
+		<security:form-login login-page="/login"
+		                     login-processing-url="/j_security_check"
+		                     authentication-success-handler-ref="loginSuccessHandler"
+		                     default-target-url="/main"
+		                     always-use-default-target="true"
+		                     authentication-failure-url="/login?error=true" />
+
+		<security:logout logout-url="/logout" logout-success-url="/member/join" invalidate-session="true" />
+
+		<!-- 접근 권한 오류 페이지 -->
+		<security:access-denied-handler error-page="/error/403" />
+
+		<!-- 세션관리 -->
+		<security:session-management>
+			<!-- 동시 접속은 한 번만 가능 -->
+			<security:concurrency-control max-sessions="1" />
+		</security:session-management>
+
+	</security:http>
+
+	<security:authentication-manager id="authenticationManager">
+		<security:authentication-provider ref="authProvider" />
+	</security:authentication-manager>
+
+	<bean id="loginSuccessHandler" class="com.nagesoft.postcode.core.LoginSuccessHandler" />
+
+	<bean id="authProvider" class="com.nagesoft.core.spring.NGMemberAuthenticationProvider">
+		<property name="userDetailService" ref="userManager" />
+	</bean>
+
+    <bean id="csrfTokenRepository" class="org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository" />
+	<bean class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler" />
+</beans>

@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nagesoft.postcode.board.dao.ArticleDao">
+
+	<resultMap type="com.nagesoft.postcode.board.model.Article" id="articleSimpleResult">
+		<id property="sequence" column="SEQ" />
+		<result property="title" column="TITLE" />
+		<result property="subTitle" column="SUB_TITLE" />
+		<result property="contents" column="CONTENTS" />
+		<result property="url" column="URL" />
+		<result property="urlTarget" column="URL_TGT" />
+		<result property="hitCount" column="HIT_COUNT" />
+		<result property="noticeYn" column="NOTICE_YN" />
+		<result property="level" column="LVL" />
+		<result property="replyOrder" column="REPLY_ORDER" />
+		<result property="useYn" column="USE_YN" />
+		<result property="category" column="CATE" />
+		<result property="categoryName" column="CD_NM" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="modDate" column="MOD_DATE" />
+		<result property="isNew" column="IS_NEW" />
+		<result property="status" column="STAT" />
+
+		<result property="linkUrl" column="LINK_URL" />
+		<result property="linkTarget" column="LINK_URL_TGT" />
+
+		<result property="regUser.id" column="R_USR_SEQ" />
+		<result property="regUser.name" column="R_USR_NM" />
+		<result property="regUser.userID" column="R_USR_ACNT" />
+		<result property="modUser.id" column="U_USR_SEQ" />
+		<result property="modUser.name" column="U_USR_NM" />
+		<result property="modUser.userID" column="U_USR_ACNT" />
+
+		<result property="regAdmin.id" column="R_MGR_ID" />
+		<result property="regAdmin.name" column="R_MGR_NM" />
+		<result property="modAdmin.id" column="U_MGR_ID" />
+		<result property="modAdmin.name" column="U_MGR_NM" />
+
+		<result property="startDate" column="START_DATE" />
+		<result property="endDate" column="END_DATE" />
+
+		<association property="board" resultMap="com.nagesoft.postcode.board.dao.BoardDao.boardResult" columnPrefix="BRD_"/>
+		<association property="thumbnail" resultMap="com.nagesoft.postcode.common.dao.AttachDao.attachResult" columnPrefix="THUMB_" />
+		<association property="attachList" resultMap="com.nagesoft.postcode.common.dao.AttachDao.attachResult" columnPrefix="ATTACH_" />
+	</resultMap>
+
+	<resultMap type="com.nagesoft.postcode.board.model.Article" id="articleResult" extends="articleSimpleResult">
+		<association property="rootArticle" resultMap="articleSimpleResult" columnPrefix="ROOT_" />
+	</resultMap>
+
+	<sql id="order">
+		ORDER BY ARTICLE.ARTICLE_SEQ DESC, ARTICLE.REPLY_ORDER ASC
+	</sql>
+
+	<sql id="listQuery">
+		SELECT
+		ARTICLE.SEQ
+		,ARTICLE.TITLE
+		,ARTICLE.SUB_TITLE
+		,ARTICLE.CONTENTS
+		,ARTICLE.URL
+		,ARTICLE.URL_TGT
+		,ARTICLE.HIT_COUNT
+		,ARTICLE.NOTICE_YN
+		,ARTICLE.ARTICLE_SEQ
+		,ARTICLE.LVL
+		,ARTICLE.REPLY_ORDER
+		,ARTICLE.USE_YN
+		,ARTICLE.BOARD_SEQ
+		,ARTICLE.CATE
+		,ARTICLE.REG_USER_SEQ
+		,ARTICLE.REG_DATE
+		,ARTICLE.MOD_USER_SEQ
+		,ARTICLE.MOD_DATE
+		,ARTICLE.START_DATE
+		,ARTICLE.END_DATE
+		,IF(	NOW() &lt; DATE_ADD(ARTICLE.REG_DATE,INTERVAL +3 DAY), 'Y','N') AS IS_NEW
+		,ROOT_ARTICLE.SEQ            AS ROOT_SEQ
+		,ROOT_ARTICLE.TITLE          AS ROOT_TITLE
+		,ROOT_ARTICLE.CONTENTS       AS ROOT_CONTENTS
+		,ROOT_ARTICLE.URL			  AS ROOT_URL
+		,ROOT_ARTICLE.URL_TGT		  AS ROOT_URL_TGT
+		,ROOT_ARTICLE.HIT_COUNT      AS ROOT_HIT_COUNT
+		,ROOT_ARTICLE.NOTICE_YN      AS ROOT_NOTICE_YN
+		,ROOT_ARTICLE.ARTICLE_SEQ    AS ROOT_ARTICLE_SEQ
+		,ROOT_ARTICLE.LVL            AS ROOT_LVL
+		,ROOT_ARTICLE.REPLY_ORDER    AS ROOT_REPLY_ORDER
+		,ROOT_ARTICLE.USE_YN         AS ROOT_USE_YN
+		,ROOT_ARTICLE.BOARD_SEQ      AS ROOT_BOARD_SEQ
+		,ROOT_ARTICLE.REG_USER_SEQ   AS ROOT_REG_USER_SEQ
+		,ROOT_ARTICLE.REG_DATE       AS ROOT_REG_DATE
+		,ROOT_ARTICLE.MOD_USER_SEQ   AS ROOT_MOD_USER_SEQ
+		,ROOT_ARTICLE.MOD_DATE       AS ROOT_MOD_DATE
+		,BOARD.SEQ                   AS BRD_SEQ
+		,BOARD.NAME                  AS BRD_NAME
+		,BOARD.DESCRIPTION           AS BRD_DESCRIPTION
+		,BOARD.DISPLAY_TITLE         AS BRD_DISPLAY_TITLE
+		,BOARD.HEADER                AS BRD_HEADER
+		,BOARD.UPPER_MENU            AS BRD_UPPER_MENU
+		,BOARD.BOARD_URL             AS BRD_BOARD_URL
+		,BOARD.REPLY_YN              AS BRD_REPLY_YN
+		,BOARD.COMMENT_YN            AS BRD_COMMENT_YN
+		,BOARD.THUMBNAIL_YN          AS BRD_THUMBNAIL_YN
+		,BOARD.USE_YN                AS BRD_USE_YN
+		,BOARD.REG_USER_SEQ          AS BRD_REG_USER_SEQ
+		,BOARD.REG_DATE              AS BRD_REG_DATE
+		,BOARD.MOD_USER_SEQ          AS BRD_MOD_USER_SEQ
+		,BOARD.MOD_DATE              AS BRD_MOD_DATE
+		,THUMB.SEQ                   AS THUMB_SEQ
+		,THUMB.SOURCE_FILE_NAME      AS THUMB_SOURCE_FILE_NAME
+		,THUMB.FILE_NAME             AS THUMB_FILE_NAME
+		,THUMB.FILE_PATH             AS THUMB_FILE_PATH
+		,THUMB.BUSINESS_CODE         AS THUMB_BUSINESS_CODE
+		,THUMB.REFERENCE_SEQ         AS THUMB_REFERENCE_SEQ
+		,THUMB.TYPE                  AS THUMB_TYPE
+		,THUMB.EXTENSION             AS THUMB_EXTENSION
+		,THUMB.FILE_SIZE             AS THUMB_FILE_SIZE
+		,THUMB.SORT_ORDER            AS THUMB_SORT_ORDER
+		,THUMB.EXTRA1                AS THUMB_EXTRA1
+		,THUMB.EXTRA2                AS THUMB_EXTRA2
+		,THUMB.REG_USER_SEQ          AS THUMB_REG_USER_SEQ
+		,THUMB.REG_DATE              AS THUMB_REG_DATE
+		,THUMB.MOD_USER_SEQ          AS THUMB_MOD_USER_SEQ
+		,THUMB.MOD_DATE              AS THUMB_MOD_DATE
+		,REG_ADMIN.MGR_ID AS R_MGR_ID
+	    ,REG_ADMIN.MGR_NM AS R_MGR_NM
+	    ,REG_ADMIN.MGR_ACNT AS   R_MGR_ACNT
+	    ,MOD_ADMIN.MGR_ID AS U_MGR_ID
+	    ,MOD_ADMIN.MGR_NM AS U_MGR_NM
+	    ,MOD_ADMIN.MGR_ACNT AS   U_MGR_ACNT
+		,REG_USR.SEQ AS  R_USR_SEQ
+	    ,REG_USR.NM AS   R_USR_NM
+	    ,REG_USR.ID AS R_USR_ACNT
+	    ,MOD_USR.SEQ AS  U_USR_SEQ
+	    ,MOD_USR.NM AS   U_USR_NM
+	    ,MOD_USR.ID AS U_USR_ID
+	    ,CD.CD_NM
+		,IF(	ARTICLE.START_DATE &gt; now(), '-1'
+				, IF(ARTICLE.START_DATE &lt; NOW() AND NOW()  &lt; DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY), '0'
+					, IF(DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY) &lt; NOW() , '1',''
+					)
+				)
+		) AS STAT
+		FROM GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		LEFT OUTER JOIN GC_ATTACH THUMB
+		ON THUMB.BUSINESS_CODE = #{thumbnailRefType, jdbcType=VARCHAR }
+		AND THUMB.REFERENCE_SEQ = ARTICLE.SEQ
+		LEFT OUTER JOIN GC_MGR REG_ADMIN
+		ON ARTICLE.REG_MGR_SEQ = REG_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_MGR MOD_ADMIN
+		ON ARTICLE.MOD_MGR_SEQ = MOD_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_USR REG_USR
+		ON ARTICLE.REG_USER_SEQ = REG_USR.SEQ
+		LEFT OUTER JOIN GC_USR MOD_USR
+		ON ARTICLE.MOD_USER_SEQ = MOD_USR.SEQ
+		LEFT OUTER JOIN GC_COMM_CD CD
+		ON ARTICLE.CATE = CD.COMM_CD
+	</sql>
+
+
+
+	<sql id="listArticleCondition">
+		<where>
+			<if test="true">
+				AND ARTICLE.DEL_YN = 'N'
+			</if>
+			<if test="boardURL != null">
+				AND BOARD.BOARD_URL = #{boardURL}
+			</if>
+			<if test="seq != null">
+				AND ARTICLE.SEQ = #{sequence}
+			</if>
+			<if test="boardSequence != null">
+				AND ARTICLE.BOARD_SEQ = #{boardSequence}
+			</if>
+			<if test="noticeYn != null">
+				AND ARTICLE.NOTICE_YN = #{noticeYn}
+			</if>
+			<if test="level != null">
+				AND ARTICLE.LVL = #{level}
+			</if>
+			<if test="title != null">
+				AND ARTICLE.TITLE LIKE CONCAT('%', #{title}, '%')
+			</if>
+			<if test="contents != null">
+				AND ARTICLE.CONTENTS LIKE CONCAT('%', #{contents}, '%')
+			</if>
+			<if test="useYn != null and useYn != 'ALL' ">
+				AND ARTICLE.USE_YN = #{useYn}
+			</if>
+			<if test='startDate != null and startDate != "" and endDate != null and endDate != "" '>
+				AND ARTICLE.REG_DATE BETWEEN STR_TO_DATE(#{startDate},'%Y-%m-%D') AND STR_TO_DATE(#{endDate},'%Y-%m-%D')
+			</if>
+			<if test="category != null and category != '' ">
+				AND ARTICLE.USE_YN = #{useYn}
+			</if>
+			<if test="searchText != null">
+				<if test="searchType == 'title'">
+					AND ARTICLE.TITLE LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+				<if test="searchType == 'contents'">
+					AND ARTICLE.CONTENTS LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+				<if test="searchType == 'writer'">
+					AND (
+						REG_ADMIN.MGR_NM LIKE CONCAT('%', #{searchText}, '%')
+						OR MOD_ADMIN.MGR_NM LIKE CONCAT('%', #{searchText}, '%')
+					)
+				</if>
+				<if test="searchType == 'all'">
+					AND (
+					    ARTICLE.TITLE LIKE CONCAT('%', #{searchText}, '%')
+					    OR ARTICLE.CONTENTS LIKE CONCAT('%', #{searchText}, '%')
+						OR (
+							REG_ADMIN.MGR_NM LIKE CONCAT('%', #{searchText}, '%')
+							OR MOD_ADMIN.MGR_NM LIKE CONCAT('%', #{searchText}, '%')
+						)
+					)
+				</if>
+				<if test="searchType == 'tc'">
+					AND (
+					    ARTICLE.TITLE LIKE CONCAT('%', #{searchText}, '%')
+					    OR ARTICLE.CONTENTS LIKE CONCAT('%', #{searchText}, '%')
+					)
+				</if>
+			</if>
+			<if test="searchType == 'category' ">
+				<if test="categoryCode != null and categoryCode != '' ">
+					AND ARTICLE.CATE = #{categoryCode}
+				</if>
+			</if>
+			<if test='space != null '>
+				AND ARTICLE.CATE = #{space}
+			</if>
+		</where>
+	</sql>
+
+	<select id="listArticleTop" resultMap="articleResult" parameterType="java.util.Map">
+		SELECT * FROM (
+			<include refid="listQuery"/>
+			WHERE ARTICLE.DEL_YN = 'N'
+			AND ARTICLE.USE_YN ='Y'
+			AND BOARD.BOARD_URL = #{boardURL}
+			<choose>
+				<when test="boardURL == event">
+					ORDER BY TMP. STAT ASC , TMP.ARTICLE_SEQ DESC,  TMP.REPLY_ORDER ASC
+				</when>
+				<otherwise>
+					ORDER BY ARTICLE.ARTICLE_SEQ DESC, ARTICLE.REPLY_ORDER ASC
+				</otherwise>
+			</choose>
+		) TMP
+		WHERE TMP.STAT != -1
+		LIMIT 0,#{number}
+	</select>
+
+
+	<select id="listArticle" resultMap="articleResult" parameterType="java.util.Map">
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingHeaderMySQL" />
+		</if>
+		<include refid="listQuery"/>
+		<include refid="listArticleCondition"/>
+		ORDER BY ARTICLE.ARTICLE_SEQ DESC, ARTICLE.REPLY_ORDER ASC
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingFooterMySQL" />
+		</if>
+	</select>
+
+
+	<select id="listArticleCnt" resultType="java.lang.Integer" parameterType="java.util.Map">
+		SELECT
+		COUNT(*) AS CNT
+		FROM
+	    GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		LEFT OUTER JOIN GC_ATTACH THUMB
+		ON THUMB.BUSINESS_CODE =  #{thumbnailRefType, jdbcType=VARCHAR }
+		AND THUMB.REFERENCE_SEQ = ARTICLE.SEQ
+		LEFT OUTER JOIN GC_MGR REG_ADMIN
+		ON ARTICLE.REG_MGR_SEQ = REG_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_MGR MOD_ADMIN
+		ON ARTICLE.MOD_MGR_SEQ = MOD_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_USR REG_USR
+		ON ARTICLE.REG_USER_SEQ = REG_USR.SEQ
+		LEFT OUTER JOIN GC_USR MOD_USR
+		ON ARTICLE.MOD_USER_SEQ = MOD_USR.SEQ
+		<include refid="listArticleCondition"/>
+	</select>
+
+	<select id="listEvent" resultMap="articleResult" parameterType="java.util.Map">
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingHeaderMySQL" />
+		</if>
+		SELECT * FROM (
+			<include refid="listQuery"/>
+			<include refid="listArticleCondition"/>
+		) TMP
+		<if test='isFront == "Y"'>
+			WHERE TMP.STAT != -1
+		</if>
+		<if test="status != null">
+			WHERE TMP.STAT = #{status }
+		</if>
+		ORDER BY TMP. STAT ASC , TMP.ARTICLE_SEQ DESC,  TMP.REPLY_ORDER ASC
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingFooterMySQL" />
+		</if>
+	</select>
+
+	<select id="getArticle" resultMap="articleResult" >
+		SELECT
+		ARTICLE.SEQ
+		,ARTICLE.TITLE
+		,ARTICLE.SUB_TITLE
+		,ARTICLE.CONTENTS
+		,ARTICLE.URL
+		,ARTICLE.URL_TGT
+		,ARTICLE.HIT_COUNT
+		,ARTICLE.NOTICE_YN
+		,ARTICLE.ARTICLE_SEQ
+		,ARTICLE.LVL
+		,ARTICLE.REPLY_ORDER
+		,ARTICLE.USE_YN
+		,ARTICLE.BOARD_SEQ
+		,ARTICLE.CATE
+		,ARTICLE.REG_USER_SEQ
+		,ARTICLE.REG_DATE
+		,ARTICLE.MOD_USER_SEQ
+		,ARTICLE.MOD_DATE
+		,ARTICLE.START_DATE
+		,ARTICLE.END_DATE
+		,ROOT_ARTICLE.SEQ             AS ROOT_SEQ
+		,ROOT_ARTICLE.TITLE           AS ROOT_TITLE
+		,ROOT_ARTICLE.CONTENTS        AS ROOT_CONTENTS
+		,ROOT_ARTICLE.URL			  AS ROOT_URL
+		,ROOT_ARTICLE.URL_TGT		  AS ROOT_URL_TGT
+		,ROOT_ARTICLE.HIT_COUNT       AS ROOT_HIT_COUNT
+		,ROOT_ARTICLE.NOTICE_YN       AS ROOT_NOTICE_YN
+		,ROOT_ARTICLE.ARTICLE_SEQ     AS ROOT_ARTICLE_SEQ
+		,ROOT_ARTICLE.LVL             AS ROOT_LVL
+		,ROOT_ARTICLE.REPLY_ORDER     AS ROOT_REPLY_ORDER
+		,ROOT_ARTICLE.USE_YN          AS ROOT_USE_YN
+		,ROOT_ARTICLE.BOARD_SEQ       AS ROOT_BOARD_SEQ
+		,ROOT_ARTICLE.REG_USER_SEQ    AS ROOT_REG_USER_SEQ
+		,ROOT_ARTICLE.REG_DATE        AS ROOT_REG_DATE
+		,ROOT_ARTICLE.MOD_USER_SEQ    AS ROOT_MOD_USER_SEQ
+		,ROOT_ARTICLE.MOD_DATE        AS ROOT_MOD_DATE
+		,BOARD.SEQ                    AS BRD_SEQ
+		,BOARD.NAME                   AS BRD_NAME
+		,BOARD.DESCRIPTION            AS BRD_DESCRIPTION
+		,BOARD.DISPLAY_TITLE          AS BRD_DISPLAY_TITLE
+		,BOARD.HEADER                 AS BRD_HEADER
+		,BOARD.UPPER_MENU             AS BRD_UPPER_MENU
+		,BOARD.BOARD_URL              AS BRD_BOARD_URL
+		,BOARD.REPLY_YN               AS BRD_REPLY_YN
+		,BOARD.COMMENT_YN             AS BRD_COMMENT_YN
+		,BOARD.THUMBNAIL_YN           AS BRD_THUMBNAIL_YN
+		,BOARD.USE_YN                 AS BRD_USE_YN
+		,BOARD.REG_USER_SEQ           AS BRD_REG_USER_SEQ
+		,BOARD.REG_DATE               AS BRD_REG_DATE
+		,BOARD.MOD_USER_SEQ           AS BRD_MOD_USER_SEQ
+		,BOARD.MOD_DATE               AS BRD_MOD_DATE
+		,THUMB.SEQ                    AS THUMB_SEQ
+		,THUMB.SOURCE_FILE_NAME       AS THUMB_SOURCE_FILE_NAME
+		,THUMB.FILE_NAME              AS THUMB_FILE_NAME
+		,THUMB.FILE_PATH              AS THUMB_FILE_PATH
+		,THUMB.BUSINESS_CODE          AS THUMB_BUSINESS_CODE
+		,THUMB.REFERENCE_SEQ          AS THUMB_REFERENCE_SEQ
+		,THUMB.TYPE                   AS THUMB_TYPE
+		,THUMB.EXTENSION              AS THUMB_EXTENSION
+		,THUMB.FILE_SIZE              AS THUMB_FILE_SIZE
+		,THUMB.SORT_ORDER             AS THUMB_SORT_ORDER
+		,THUMB.EXTRA1                 AS THUMB_EXTRA1
+		,THUMB.EXTRA2                 AS THUMB_EXTRA2
+		,THUMB.REG_USER_SEQ           AS THUMB_REG_USER_SEQ
+		,THUMB.REG_DATE               AS THUMB_REG_DATE
+		,THUMB.MOD_USER_SEQ           AS THUMB_MOD_USER_SEQ
+		,THUMB.MOD_DATE               AS THUMB_MOD_DATE
+		,F.SEQ                        AS ATTACH_SEQ
+		,F.SOURCE_FILE_NAME           AS ATTACH_SOURCE_FILE_NAME
+		,F.FILE_NAME                  AS ATTACH_FILE_NAME
+		,F.FILE_PATH                  AS ATTACH_FILE_PATH
+		,F.BUSINESS_CODE              AS ATTACH_BUSINESS_CODE
+		,F.REFERENCE_SEQ              AS ATTACH_REFERENCE_SEQ
+		,F.TYPE                       AS ATTACH_TYPE
+		,F.EXTENSION                  AS ATTACH_EXTENSION
+		,F.FILE_SIZE                  AS ATTACH_FILE_SIZE
+		,F.SORT_ORDER                 AS ATTACH_SORT_ORDER
+		,F.EXTRA1                     AS ATTACH_EXTRA1
+		,F.EXTRA2                     AS ATTACH_EXTRA2
+		,F.REG_USER_SEQ               AS ATTACH_REG_USER_SEQ
+		,F.REG_DATE                   AS ATTACH_REG_DATE
+		,F.MOD_USER_SEQ               AS ATTACH_MOD_USER_SEQ
+		,F.MOD_DATE                   AS ATTACH_MOD_DATE
+		,LINK.URL AS LINK_URL
+		,LINK.URL_TGT AS LINK_URL_TGT
+		,REG_ADMIN.MGR_ID AS R_MGR_ID
+	    ,REG_ADMIN.MGR_NM AS R_MGR_NM
+	    ,REG_ADMIN.MGR_ACNT AS   R_MGR_ACNT
+	    ,MOD_ADMIN.MGR_ID AS U_MGR_ID
+	    ,MOD_ADMIN.MGR_NM AS U_MGR_NM
+	    ,MOD_ADMIN.MGR_ACNT AS   U_MGR_ACNT
+		,REG_USR.SEQ AS  R_USR_SEQ
+	    ,REG_USR.NM AS   R_USR_NM
+	    ,REG_USR.ID AS R_USR_ACNT
+	    ,MOD_USR.SEQ AS  U_USR_SEQ
+	    ,MOD_USR.NM AS   U_USR_NM
+	    ,MOD_USR.ID AS U_USR_ACNT
+		,IF(	ARTICLE.START_DATE &gt; now(), '-1'
+				, IF(ARTICLE.START_DATE &lt; NOW() AND NOW()  &lt; DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY), '0'
+					, IF(DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY) &lt; NOW() , '1',''
+					)
+				)
+		) AS STAT
+		FROM GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		LEFT OUTER JOIN GC_ATTACH THUMB
+		ON THUMB.BUSINESS_CODE = #{thumbnailRefType, jdbcType=VARCHAR }
+		AND THUMB.REFERENCE_SEQ = ARTICLE.SEQ
+		LEFT OUTER JOIN GC_ATTACH F
+		ON F.BUSINESS_CODE = #{articleFileRefType, jdbcType=VARCHAR }
+		AND F.REFERENCE_SEQ = ARTICLE.SEQ
+		LEFT OUTER JOIN GC_ARTICLE_ATTACH_LINK LINK
+		ON F.SEQ = LINK.ARTICLE_SEQ
+		AND F.SEQ = LINK.ATTACH_SEQ
+		LEFT OUTER JOIN GC_MGR REG_ADMIN
+		ON ARTICLE.REG_MGR_SEQ = REG_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_MGR MOD_ADMIN
+		ON ARTICLE.MOD_MGR_SEQ = MOD_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_USR REG_USR
+		ON ARTICLE.REG_USER_SEQ = REG_USR.SEQ
+		LEFT OUTER JOIN GC_USR MOD_USR
+		ON ARTICLE.MOD_USER_SEQ = MOD_USR.SEQ
+		WHERE ARTICLE.SEQ = #{sequence }
+	</select>
+
+	<select id="getPrevArticle" resultMap="articleResult" >
+		SELECT
+		        ARTICLE.SEQ
+		        ,ARTICLE.TITLE
+		        ,ARTICLE.SUB_TITLE
+		        ,ARTICLE.CONTENTS
+				,ARTICLE.URL
+				,ARTICLE.URL_TGT
+		        ,ARTICLE.HIT_COUNT
+		        ,ARTICLE.NOTICE_YN
+		        ,ARTICLE.ARTICLE_SEQ
+		        ,ARTICLE.LVL
+		        ,ARTICLE.REPLY_ORDER
+		        ,ARTICLE.USE_YN
+		        ,ARTICLE.BOARD_SEQ
+		        ,ARTICLE.CATE
+		        ,ARTICLE.REG_USER_SEQ
+		        ,ARTICLE.REG_DATE
+		        ,ARTICLE.MOD_USER_SEQ
+		        ,ARTICLE.MOD_DATE
+		        ,ARTICLE.START_DATE
+				,ARTICLE.END_DATE
+		        ,ROOT_ARTICLE.SEQ              AS ROOT_SEQ
+		        ,ROOT_ARTICLE.TITLE            AS ROOT_TITLE
+		        ,ROOT_ARTICLE.CONTENTS         AS ROOT_CONTENTS
+				,ROOT_ARTICLE.URL			   AS ROOT_URL
+				,ROOT_ARTICLE.URL_TGT		   AS ROOT_URL_TGT
+		        ,ROOT_ARTICLE.HIT_COUNT        AS ROOT_HIT_COUNT
+		        ,ROOT_ARTICLE.NOTICE_YN        AS ROOT_NOTICE_YN
+		        ,ROOT_ARTICLE.ARTICLE_SEQ      AS ROOT_ARTICLE_SEQ
+		        ,ROOT_ARTICLE.LVL              AS ROOT_LVL
+		        ,ROOT_ARTICLE.REPLY_ORDER      AS ROOT_REPLY_ORDER
+		        ,ROOT_ARTICLE.USE_YN           AS ROOT_USE_YN
+		        ,ROOT_ARTICLE.BOARD_SEQ        AS ROOT_BOARD_SEQ
+		        ,ROOT_ARTICLE.REG_USER_SEQ     AS ROOT_REG_USER_SEQ
+		        ,ROOT_ARTICLE.REG_DATE         AS ROOT_REG_DATE
+		        ,ROOT_ARTICLE.MOD_USER_SEQ     AS ROOT_MOD_USER_SEQ
+		        ,ROOT_ARTICLE.MOD_DATE         AS ROOT_MOD_DATE
+		        ,BOARD.SEQ                     AS BRD_SEQ
+		        ,BOARD.NAME                    AS BRD_NAME
+		        ,BOARD.DESCRIPTION             AS BRD_DESCRIPTION
+		        ,BOARD.DISPLAY_TITLE           AS BRD_DISPLAY_TITLE
+		        ,BOARD.HEADER                  AS BRD_HEADER
+		        ,BOARD.UPPER_MENU              AS BRD_UPPER_MENU
+		        ,BOARD.BOARD_URL               AS BRD_BOARD_URL
+		        ,BOARD.REPLY_YN                AS BRD_REPLY_YN
+		        ,BOARD.COMMENT_YN              AS BRD_COMMENT_YN
+		        ,BOARD.THUMBNAIL_YN            AS BRD_THUMBNAIL_YN
+		        ,BOARD.USE_YN                  AS BRD_USE_YN
+		        ,BOARD.REG_USER_SEQ            AS BRD_REG_USER_SEQ
+		        ,BOARD.REG_DATE                AS BRD_REG_DATE
+		        ,BOARD.MOD_USER_SEQ            AS BRD_MOD_USER_SEQ
+		        ,BOARD.MOD_DATE                AS BRD_MOD_DATE
+				,IF(	ARTICLE.START_DATE &gt; now(), '-1'
+						, IF(ARTICLE.START_DATE &lt; NOW() AND NOW()  &lt; DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY), '0'
+							, IF(DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY) &lt; NOW() , '1',''
+							)
+						)
+				) AS STAT
+		FROM GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		WHERE
+		ARTICLE.LVL = 1
+		AND ARTICLE.SEQ = (
+		SELECT MAX(ARTICLE.SEQ)
+		FROM GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		WHERE ARTICLE.SEQ &lt; #{sequence}
+		  AND BOARD.BOARD_URL = #{board.boardURL}
+		  AND ARTICLE.DEL_YN = 'N')
+	</select>
+	<select id="getNextArticle" resultMap="articleResult" >
+		SELECT
+		        ARTICLE.SEQ
+		        ,ARTICLE.TITLE
+		        ,ARTICLE.SUB_TITLE
+		        ,ARTICLE.CONTENTS
+				,ARTICLE.URL
+				,ARTICLE.URL_TGT
+		        ,ARTICLE.HIT_COUNT
+		        ,ARTICLE.NOTICE_YN
+		        ,ARTICLE.ARTICLE_SEQ
+		        ,ARTICLE.LVL
+		        ,ARTICLE.REPLY_ORDER
+		        ,ARTICLE.USE_YN
+		        ,ARTICLE.BOARD_SEQ
+		        ,ARTICLE.CATE
+		        ,ARTICLE.REG_USER_SEQ
+		        ,ARTICLE.REG_DATE
+		        ,ARTICLE.MOD_USER_SEQ
+		        ,ARTICLE.MOD_DATE
+		        ,ARTICLE.START_DATE
+				,ARTICLE.END_DATE
+		        ,ROOT_ARTICLE.SEQ        	  AS ROOT_SEQ
+		        ,ROOT_ARTICLE.TITLE      	  AS ROOT_TITLE
+		        ,ROOT_ARTICLE.CONTENTS   	  AS ROOT_CONTENTS
+				,ROOT_ARTICLE.URL			  AS ROOT_URL
+				,ROOT_ARTICLE.URL_TGT		  AS ROOT_URL_TGT
+		        ,ROOT_ARTICLE.HIT_COUNT  	  AS ROOT_HIT_COUNT
+		        ,ROOT_ARTICLE.NOTICE_YN  	  AS ROOT_NOTICE_YN
+		        ,ROOT_ARTICLE.ARTICLE_SEQ 	  AS ROOT_ARTICLE_SEQ
+		        ,ROOT_ARTICLE.LVL         	  AS ROOT_LVL
+		        ,ROOT_ARTICLE.REPLY_ORDER 	  AS ROOT_REPLY_ORDER
+		        ,ROOT_ARTICLE.USE_YN     	  AS ROOT_USE_YN
+		        ,ROOT_ARTICLE.BOARD_SEQ    	  AS ROOT_BOARD_SEQ
+		        ,ROOT_ARTICLE.REG_USER_SEQ 	  AS ROOT_REG_USER_SEQ
+		        ,ROOT_ARTICLE.REG_DATE   	  AS ROOT_REG_DATE
+		        ,ROOT_ARTICLE.MOD_USER_SEQ 	  AS ROOT_MOD_USER_SEQ
+		        ,ROOT_ARTICLE.MOD_DATE    	  AS ROOT_MOD_DATE
+		        ,BOARD.SEQ                    AS BRD_SEQ
+		        ,BOARD.NAME                   AS BRD_NAME
+		        ,BOARD.DESCRIPTION            AS BRD_DESCRIPTION
+		        ,BOARD.DISPLAY_TITLE          AS BRD_DISPLAY_TITLE
+		        ,BOARD.HEADER                 AS BRD_HEADER
+		        ,BOARD.UPPER_MENU             AS BRD_UPPER_MENU
+		        ,BOARD.BOARD_URL              AS BRD_BOARD_URL
+		        ,BOARD.REPLY_YN               AS BRD_REPLY_YN
+		        ,BOARD.COMMENT_YN             AS BRD_COMMENT_YN
+		        ,BOARD.THUMBNAIL_YN           AS BRD_THUMBNAIL_YN
+		        ,BOARD.USE_YN                 AS BRD_USE_YN
+		        ,BOARD.REG_USER_SEQ           AS BRD_REG_USER_SEQ
+		        ,BOARD.REG_DATE               AS BRD_REG_DATE
+		        ,BOARD.MOD_USER_SEQ           AS BRD_MOD_USER_SEQ
+		        ,BOARD.MOD_DATE               AS BRD_MOD_DATE
+				,IF(	ARTICLE.START_DATE &gt; now(), '-1'
+						, IF(ARTICLE.START_DATE &lt; NOW() AND NOW()  &lt; DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY), '0'
+							, IF(DATE_ADD(DATE_ADD(ARTICLE.END_DATE,INTERVAL -1 SECOND) ,INTERVAL 1 DAY) &lt; NOW() , '1',''
+							)
+						)
+				) AS STAT
+		FROM GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		WHERE
+		ARTICLE.LVL = 1
+		AND ARTICLE.SEQ = (
+		SELECT MIN(ARTICLE.SEQ)
+		FROM GC_ARTICLE ARTICLE
+		INNER JOIN GC_ARTICLE ROOT_ARTICLE
+		ON ARTICLE.ARTICLE_SEQ = ROOT_ARTICLE.SEQ
+		INNER JOIN GC_BOARD BOARD
+		ON ARTICLE.BOARD_SEQ = BOARD.SEQ
+		WHERE ARTICLE.SEQ &gt; #{sequence}
+		  AND BOARD.BOARD_URL = #{board.boardURL}
+		  AND ARTICLE.DEL_YN = 'N')
+	</select>
+
+
+	<!-- Article Insert - mssql -->
+	<insert id="insert" parameterType="com.nagesoft.postcode.board.model.Article" >
+			INSERT INTO GC_ARTICLE
+			(
+			TITLE
+			,SUB_TITLE
+			,CONTENTS
+			,URL
+			,URL_TGT
+			,HIT_COUNT
+			,NOTICE_YN
+			,USE_YN
+			,BOARD_SEQ
+			,ARTICLE_SEQ
+			,LVL
+			,REPLY_ORDER
+			,REG_USER_SEQ
+			,REG_MGR_SEQ
+			,REG_DATE
+			,START_DATE
+			,END_DATE
+			,CATE
+			)
+			VALUES
+			(
+			#{title,			jdbcType=VARCHAR }
+			,#{subTitle,			jdbcType=VARCHAR }
+			,#{contents, jdbcType=VARCHAR }
+			,#{url, 			 jdbcType=VARCHAR }
+			,#{urlTarget, jdbcType=VARCHAR }
+			,#{hitCount }
+			,#{noticeYn, jdbcType=VARCHAR }
+			,#{useYn, 	jdbcType=VARCHAR }
+			,#{board.sequence }
+			,#{rootArticle.sequence }
+			,#{level }
+			,#{replyOrder }
+			,#{regUser.id }
+			,#{regAdmin.id }
+			,NOW()
+			,#{startDate, jdbcType=VARCHAR }
+			,#{endDate, jdbcType=VARCHAR }
+			,#{category,	jdbcType=VARCHAR }
+			)
+
+		<selectKey keyProperty="sequence" order="AFTER" resultType="java.lang.Long">
+		    SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<update id="addHitCount" parameterType="java.util.Map">
+		UPDATE GC_ARTICLE
+		SET
+			HIT_COUNT = HIT_COUNT + 1
+		WHERE SEQ = #{sequence }
+	</update>
+
+
+	<update id="updateArticleSequence" parameterType="com.nagesoft.postcode.board.model.Article">
+		UPDATE GC_ARTICLE
+		SET
+			ARTICLE_SEQ = #{sequence }
+		WHERE SEQ = #{sequence }
+	</update>
+
+
+	<update id="updateReplyPrepareOrder" parameterType="com.nagesoft.postcode.board.model.Article">
+		UPDATE GC_ARTICLE
+		SET
+			REPLY_ORDER = REPLY_ORDER + 1
+		WHERE ARTICLE_SEQ = #{rootArticle.sequence }
+		AND REPLY_ORDER >= #{replyOrder }
+	</update>
+
+	<update id="update" parameterType="com.nagesoft.postcode.board.model.Article" >
+		UPDATE GC_ARTICLE
+		SET
+			TITLE = 					#{title, jdbcType=VARCHAR }
+			,SUB_TITLE = 				#{subTitle, jdbcType=VARCHAR }
+			,CONTENTS = 				#{contents, jdbcType=VARCHAR }
+			,URL = 						#{url, jdbcType=VARCHAR }
+			,URL_TGT = 					#{urlTarget, jdbcType=VARCHAR }
+			,NOTICE_YN = 				#{noticeYn, jdbcType=VARCHAR }
+			,USE_YN = 					#{useYn, jdbcType=VARCHAR }
+			,BOARD_SEQ = 				#{board.sequence }
+			,LVL = 						#{level }
+			,REPLY_ORDER = 				#{replyOrder }
+			,MOD_USER_SEQ = 			#{modUser.id }
+			,MOD_MGR_SEQ = 				#{modAdmin.id }
+			,MOD_DATE = 				NOW()
+			,START_DATE =				#{startDate, jdbcType=VARCHAR }
+			,END_DATE =					#{endDate, jdbcType=VARCHAR }
+			,CATE =						#{category, jdbcType=VARCHAR }
+		WHERE SEQ = #{sequence }
+	</update>
+
+	<update id="delete" parameterType="java.lang.Long">
+		UPDATE GC_ARTICLE
+		SET
+		DEL_YN = 'Y'
+		WHERE SEQ = #{sequence}
+	</update>
+
+
+</mapper>

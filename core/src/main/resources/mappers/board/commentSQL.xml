@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nagesoft.postcode.board.dao.CommentDao">
+
+	<resultMap type="com.nagesoft.postcode.board.model.Comment" id="commentSimpleResult" >
+		<id     property="sequence" column="SEQ" />
+		<result property="contents" column="CONTENTS" />
+		<result property="regUserNickname" column="REG_USER_NICKNAME" />
+		<result property="email" column="EMAIL" />
+		<result property="level" column="LVL" />
+		<result property="replyOrder" column="REPLY_ORDER" />
+		<result property="useYn" column="USE_YN" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="modDate" column="MOD_DATE" />
+
+		<result property="regUser.id" column="R_USER_SEQ" />
+		<result property="regUser.name" column="R_USR_NM" />
+		<result property="regUser.account" column="R_USR_ACNT" />
+		<result property="modUser.id" column="U_USR_SEQ" />
+		<result property="modUser.name" column="U_USR_NM" />
+		<result property="modUser.account" column="U_USR_ACNT" />
+
+		<result property="regAdmin.id" column="R_MGR_ID" />
+		<result property="regAdmin.name" column="R_MGR_NM" />
+		<result property="modAdmin.id" column="U_MGR_ID" />
+		<result property="modAdmin.name" column="U_MGR_NM" />
+
+		<association property="article" resultMap="com.nagesoft.postcode.board.dao.ArticleDao.articleSimpleResult" columnPrefix="ATCL_" />
+	</resultMap>
+
+	<resultMap type="com.nagesoft.postcode.board.model.Comment" id="commentResult" extends="commentSimpleResult">
+		<association property="rootComment" resultMap="commentSimpleResult" columnPrefix="ROOT_" />
+	</resultMap>
+
+	<sql id="listCommentCondition">
+		<where>
+			<if test="sequence != null">
+				AND COMMENT.SEQ = #{sequence}
+			</if>
+			<if test="articleSequence != null">
+				AND COMMENT.ARTICLE_SEQ = #{articleSequence}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getComment" resultMap="commentResult" parameterType="java.util.Map">
+		SELECT
+		 COMMENT.SEQ
+		,COMMENT.CONTENTS
+		,COMMENT.REG_USER_NICKNAME
+		,COMMENT.EMAIL
+		,COMMENT.ARTICLE_SEQ
+		,COMMENT.COMMENT_SEQ
+		,COMMENT.LVL
+		,COMMENT.REPLY_ORDER
+		,COMMENT.USE_YN
+		,COMMENT.REG_USER_SEQ
+		,COMMENT.REG_DATE
+		,COMMENT.MOD_USER_SEQ
+		,COMMENT.MOD_DATE
+		,ROOT_COMMENT.SEQ                AS ROOT_SEQ
+		,ROOT_COMMENT.CONTENTS           AS ROOT_CONTENTS
+		,ROOT_COMMENT.REG_USER_NICKNAME  AS ROOT_REG_USER_NICKNAME
+		,ROOT_COMMENT.EMAIL              AS ROOT_EMAIL
+		,ROOT_COMMENT.ARTICLE_SEQ        AS ROOT_ARTICLE_SEQ
+		,ROOT_COMMENT.COMMENT_SEQ        AS ROOT_COMMENT_SEQ
+		,ROOT_COMMENT.LVL                AS ROOT_LVL
+		,ROOT_COMMENT.REPLY_ORDER        AS ROOT_REPLY_ORDER
+		,ROOT_COMMENT.USE_YN             AS ROOT_USE_YN
+		,ROOT_COMMENT.REG_USER_SEQ       AS ROOT_REG_USER_SEQ
+		,ROOT_COMMENT.REG_DATE           AS ROOT_REG_DATE
+		,ROOT_COMMENT.MOD_USER_SEQ       AS ROOT_MOD_USER_SEQ
+		,ROOT_COMMENT.MOD_DATE           AS ROOT_MOD_DATE
+		,ARTICLE.SEQ                     AS ATCL_SEQ
+		,ARTICLE.TITLE                   AS ATCL_TITLE
+		,ARTICLE.CONTENTS                AS ATCL_CONTENTS
+		,ARTICLE.HIT_COUNT               AS ATCL_HIT_COUNT
+		,ARTICLE.NOTICE_YN               AS ATCL_NOTICE_YN
+		,ARTICLE.ARTICLE_SEQ             AS ATCL_ARTICLE_SEQ
+		,ARTICLE.LVL                     AS ATCL_LVL
+		,ARTICLE.REPLY_ORDER             AS ATCL_REPLY_ORDER
+		,ARTICLE.USE_YN                  AS ATCL_USE_YN
+		,ARTICLE.BOARD_SEQ               AS ATCL_BOARD_SEQ
+		,ARTICLE.REG_USER_SEQ            AS ATCL_REG_USER_SEQ
+		,ARTICLE.REG_DATE                AS ATCL_REG_DATE
+		,ARTICLE.MOD_USER_SEQ            AS ATCL_MOD_USER_SEQ
+		,ARTICLE.MOD_DATE                AS ATCL_MOD_DATE
+		,REG_ADMIN.MGR_ID AS R_MGR_ID
+	    ,REG_ADMIN.MGR_NM AS R_MGR_NM
+	    ,REG_ADMIN.MGR_ACNT AS   R_MGR_ACNT
+	    ,MOD_ADMIN.MGR_ID AS U_MGR_ID
+	    ,MOD_ADMIN.MGR_NM AS U_MGR_NM
+	    ,MOD_ADMIN.MGR_ACNT AS   U_MGR_ACNT
+		,REG_USR.SEQ AS  R_USR_SEQ
+	    ,REG_USR.NM AS   R_USR_NM
+	    ,REG_USR.ID AS R_USR_ACNT
+	    ,MOD_USR.SEQ AS  U_USR_SEQ
+	    ,MOD_USR.NM AS   U_USR_NM
+	    ,MOD_USR.ID AS U_USR_ACNT
+		FROM GC_COMMENT COMMENT
+		INNER JOIN GC_COMMENT ROOT_COMMENT
+		ON COMMENT.COMMENT_SEQ = ROOT_COMMENT.SEQ
+		INNER JOIN GC_ARTICLE ARTICLE
+		ON COMMENT.ARTICLE_SEQ = ARTICLE.ARTICLE_SEQ
+		LEFT OUTER JOIN GC_MGR REG_ADMIN
+		ON COMMENT.REG_MGR_SEQ = REG_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_MGR MOD_ADMIN
+		ON COMMENT.MOD_MGR_SEQ = MOD_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_USR REG_USR
+		ON COMMENT.REG_USER_SEQ = REG_USR.SEQ
+		LEFT OUTER JOIN GC_USR MOD_USR
+		ON COMMENT.MOD_USER_SEQ = MOD_USR.SEQ
+		WHERE COMMENT.SEQ = #{sequence }
+	</select>
+
+
+	<select id="listComment" resultMap="commentResult" parameterType="java.util.Map">
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingHeaderMySQL" />
+		</if>
+		SELECT
+		 COMMENT.SEQ
+		,COMMENT.CONTENTS
+		,COMMENT.REG_USER_NICKNAME
+		,COMMENT.EMAIL
+		,COMMENT.ARTICLE_SEQ
+		,COMMENT.COMMENT_SEQ
+		,COMMENT.LVL
+		,COMMENT.REPLY_ORDER
+		,COMMENT.USE_YN
+		,COMMENT.REG_USER_SEQ
+		,COMMENT.REG_DATE
+		,COMMENT.MOD_USER_SEQ
+		,COMMENT.MOD_DATE
+		,ROOT_COMMENT.SEQ               AS ROOT_SEQ
+		,ROOT_COMMENT.CONTENTS          AS ROOT_CONTENTS
+		,ROOT_COMMENT.REG_USER_NICKNAME AS ROOT_REG_USER_NICKNAME
+		,ROOT_COMMENT.EMAIL             AS ROOT_EMAIL
+		,ROOT_COMMENT.ARTICLE_SEQ       AS ROOT_ARTICLE_SEQ
+		,ROOT_COMMENT.COMMENT_SEQ       AS ROOT_COMMENT_SEQ
+		,ROOT_COMMENT.LVL               AS ROOT_LVL
+		,ROOT_COMMENT.REPLY_ORDER       AS ROOT_REPLY_ORDER
+		,ROOT_COMMENT.USE_YN            AS ROOT_USE_YN
+		,ROOT_COMMENT.REG_USER_SEQ      AS ROOT_REG_USER_SEQ
+		,ROOT_COMMENT.REG_DATE          AS ROOT_REG_DATE
+		,ROOT_COMMENT.MOD_USER_SEQ      AS ROOT_MOD_USER_SEQ
+		,ROOT_COMMENT.MOD_DATE          AS ROOT_MOD_DATE
+		,ARTICLE.SEQ                    AS ATCL_SEQ
+		,ARTICLE.TITLE                  AS ATCL_TITLE
+		,ARTICLE.CONTENTS               AS ATCL_CONTENTS
+		,ARTICLE.HIT_COUNT              AS ATCL_HIT_COUNT
+		,ARTICLE.NOTICE_YN              AS ATCL_NOTICE_YN
+		,ARTICLE.ARTICLE_SEQ            AS ATCL_ARTICLE_SEQ
+		,ARTICLE.LVL                    AS ATCL_LVL
+		,ARTICLE.REPLY_ORDER            AS ATCL_REPLY_ORDER
+		,ARTICLE.USE_YN                 AS ATCL_USE_YN
+		,ARTICLE.BOARD_SEQ              AS ATCL_BOARD_SEQ
+		,ARTICLE.REG_USER_SEQ           AS ATCL_REG_USER_SEQ
+		,ARTICLE.REG_DATE               AS ATCL_REG_DATE
+		,ARTICLE.MOD_USER_SEQ           AS ATCL_MOD_USER_SEQ
+		,ARTICLE.MOD_DATE               AS ATCL_MOD_DATE
+		,REG_ADMIN.MGR_ID AS R_MGR_ID
+	    ,REG_ADMIN.MGR_NM AS R_MGR_NM
+	    ,REG_ADMIN.MGR_ACNT AS   R_MGR_ACNT
+	    ,MOD_ADMIN.MGR_ID AS U_MGR_ID
+	    ,MOD_ADMIN.MGR_NM AS U_MGR_NM
+	    ,MOD_ADMIN.MGR_ACNT AS   U_MGR_ACNT
+		,REG_USR.SEQ AS  R_USR_SEQ
+	    ,REG_USR.NM AS   R_USR_NM
+	    ,REG_USR.ID AS R_USR_ACNT
+	    ,MOD_USR.SEQ AS  U_USR_SEQ
+	    ,MOD_USR.NM AS   U_USR_NM
+	    ,MOD_USR.ID AS U_USR_ACNT
+		FROM GC_COMMENT COMMENT
+		INNER JOIN GC_COMMENT ROOT_COMMENT
+		ON COMMENT.COMMENT_SEQ = ROOT_COMMENT.SEQ
+		INNER JOIN GC_ARTICLE ARTICLE
+		ON COMMENT.ARTICLE_SEQ = ARTICLE.ARTICLE_SEQ
+		LEFT OUTER JOIN GC_MGR REG_ADMIN
+		ON COMMENT.REG_MGR_SEQ = REG_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_MGR MOD_ADMIN
+		ON COMMENT.MOD_MGR_SEQ = MOD_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_USR REG_USR
+		ON COMMENT.REG_USER_SEQ = REG_USR.SEQ
+		LEFT OUTER JOIN GC_USR MOD_USR
+		ON COMMENT.MOD_USER_SEQ = MOD_USR.SEQ
+		<include refid="listCommentCondition"/>
+		ORDER BY COMMENT.COMMENT_SEQ DESC, COMMENT.REPLY_ORDER ASC
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingFooterMySQL" />
+		</if>
+	</select>
+
+
+	<select id="listCommentCnt" resultType="java.lang.Integer" parameterType="java.util.Map">
+		SELECT
+		COUNT(*) AS CNT
+		FROM GC_COMMENT COMMENT
+		LEFT OUTER JOIN GC_COMMENT ROOT_COMMENT
+		ON COMMENT.COMMENT_SEQ = ROOT_COMMENT.SEQ
+		INNER JOIN GC_ARTICLE ARTICLE
+		ON COMMENT.ARTICLE_SEQ = ARTICLE.ARTICLE_SEQ
+		LEFT OUTER JOIN GC_MGR REG_ADMIN
+		ON COMMENT.REG_MGR_SEQ = REG_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_MGR MOD_ADMIN
+		ON COMMENT.MOD_MGR_SEQ = MOD_ADMIN.MGR_ID
+		LEFT OUTER JOIN GC_USR REG_USR
+		ON COMMENT.REG_USER_SEQ = REG_USR.SEQ
+		LEFT OUTER JOIN GC_USR MOD_USR
+		ON COMMENT.MOD_USER_SEQ = MOD_USR.SEQ
+		<include refid="listCommentCondition"/>
+	</select>
+
+	<insert id="insert" parameterType="com.nagesoft.postcode.board.model.Comment">
+			INSERT INTO GC_COMMENT
+			(
+			CONTENTS
+			,REG_USER_NICKNAME
+			,EMAIL
+			,ARTICLE_SEQ
+			,COMMENT_SEQ
+			,LVL
+			,REPLY_ORDER
+			,USE_YN
+			,REG_USER_SEQ
+			,REG_MGR_SEQ
+			,REG_DATE
+			)
+			VALUES
+			(
+			#{contents, jdbcType=VARCHAR }
+			,#{regUserNickname, jdbcType=VARCHAR  }
+			,#{email, jdbcType=VARCHAR  }
+			,#{article.sequence }
+			,#{rootComment.sequence }
+			,#{level }
+			,#{replyOrder }
+			,#{useYn, jdbcType=VARCHAR  }
+			,#{regUser.id }
+			,#{regAdmin.id }
+			,NOW()
+			)
+
+		<selectKey keyProperty="sequence" order="AFTER" resultType="java.lang.Long">
+		    SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<update id="update">
+		UPDATE GC_COMMENT
+		SET
+			CONTENTS = #{contents, jdbcType=VARCHAR }
+			,REG_USER_NICKNAME = #{regUserNickname, jdbcType=VARCHAR }
+			,EMAIL - #{email, jdbcType=VARCHAR }
+			,ARTICLE_SEQ = #{article.sequence }
+			,COMMENT_SEQ = #{rootComment.sequence }
+			,LVL = #{level }
+			,REPLY_ORDER = #{replyOrder }
+			,USE_YN = #{useYn, jdbcType=VARCHAR }
+			,MOD_USER_SEQ = #{modUser.id }
+			,MOD_MGR_SEQ = #{modAdmin.id }
+			,MOD_DATE = NOW()
+		WHERE SEQ = #{sequence}
+	</update>
+
+	<update id="updateCommentSequence" parameterType="com.nagesoft.postcode.board.model.Comment">
+		UPDATE GC_COMMENT
+		SET
+			COMMENT_SEQ = #{sequence }
+		WHERE SEQ = #{sequence }
+	</update>
+
+	<update id="updateReplyPrepareOrder" parameterType="com.nagesoft.postcode.board.model.Comment">
+		UPDATE GC_COMMENT
+		SET
+			REPLY_ORDER = REPLY_ORDER + 1
+		WHERE COMMENT_SEQ = #{rootComment.sequence }
+		AND REPLY_ORDER >= #{replyOrder }
+	</update>
+
+	<delete id="deleteComment" parameterType="java.lang.Long">
+		DELETE
+		FROM GC_COMMENT
+		WHERE SEQ = #{sequence}
+	</delete>
+
+</mapper>

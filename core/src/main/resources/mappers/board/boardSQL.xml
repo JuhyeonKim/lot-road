@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nagesoft.postcode.board.dao.BoardDao">
+
+	<resultMap type="com.nagesoft.postcode.board.model.Board" id="boardResult">
+		<id property="sequence" column="SEQ" />
+		<result property="name" column="NAME" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="displayTitle" column="DISPLAY_TITLE" />
+		<result property="header" column="HEADER" />
+		<result property="upperMenu" column="UPPER_MENU" />
+		<result property="boardType" column="BOARD_TYPE" typeHandler="com.nagesoft.postcode.board.model.BoardTypeEnumHandler"/>
+		<result property="boardURL" column="BOARD_URL" />
+		<result property="replyYn" column="REPLY_YN" />
+		<result property="commentYn" column="COMMENT_YN" />
+		<result property="thumbnailYn" column="THUMBNAIL_YN" />
+		<result property="attachYn" column="ATTACH_YN" />
+		<result property="prevNextYn" column="PREV_NEXT_YN" />
+		<result property="userWritableYn" column="USER_WRITABLE_YN" />
+		<result property="secretYn" column="SECRET_YN" />
+		<result property="emailSendYn" column="EMAIL_SEND_YN" />
+		<result property="category" column="CATE" />
+		<result property="linkYn" column="LINK_YN" />
+		<result property="useYn" column="USE_YN" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="regUser.id" column="REG_USER_SEQ" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="modUser.id" column="MOD_USER_SEQ" />
+		<result property="modDate" column="MOD_DATE" />
+		<result property="periodYn" column="PERIOD_YN" />
+	</resultMap>
+
+
+	<resultMap type="com.nagesoft.postcode.board.model.Board" id="boardArticleResult" extends="boardResult">
+		<association property="articleList" resultMap="com.nagesoft.postcode.board.dao.ArticleDao.articleResult" columnPrefix="ATCL_"/>
+	</resultMap>
+
+	<sql id="listBoardCondition">
+		<where>
+			<if test="true">
+				AND DEL_YN = 'N'
+			</if>
+			<if test="sequence != null">
+				AND SEQ = #{sequence}
+			</if>
+			<if test="useYn != null">
+				AND USE_YN = #{useYn}
+			</if>
+			<if test="boardURL != null">
+				AND BOARD.BOARD_URL = #{boardURL}
+			</if>
+			<if test="boardURL != null">
+				AND BOARD.BOARD_URL = #{boardURL}
+			</if>
+			<if test="searchText != null">
+				<if test="searchType == 'name'">
+					AND BOARD.NAME LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+				<if test="searchType == 'boardURL'">
+					AND BOARD.BOARD_URL LIKE CONCAT('%', #{searchText}, '%')
+				</if>
+				<if test="searchType == 'all'">
+					AND (
+					    BOARD.NAME LIKE CONCAT('%', #{searchText}, '%') OR
+					    BOARD.BOARD_URL LIKE CONCAT('%', #{searchText}, '%')
+					)
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<sql id="getBoardCondition">
+		<where>
+			<if test="sequence != null">
+				AND SEQ = #{sequence}
+			</if>
+			<if test="boardURL != null">
+				AND BOARD_URL = #{boardURL}
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="getBoard" resultMap="boardResult" >
+		SELECT
+		SEQ
+		,NAME
+		,DESCRIPTION
+		,DISPLAY_TITLE
+		,HEADER
+		,UPPER_MENU
+		,BOARD_URL
+		,BOARD_TYPE
+		,REPLY_YN
+		,COMMENT_YN
+		,THUMBNAIL_YN
+		,ATTACH_YN
+		,PREV_NEXT_YN
+		,USER_WRITABLE_YN
+		,SECRET_YN
+		,EMAIL_SEND_YN
+		,CATE
+		,LINK_YN
+		,USE_YN
+		,DEL_YN
+		,REG_USER_SEQ
+		,REG_DATE
+		,MOD_USER_SEQ
+		,MOD_DATE
+		,PERF_YN
+		,PERIOD_YN
+		FROM GC_BOARD BOARD
+		<include refid="getBoardCondition"/>
+		ORDER BY SEQ DESC
+	</select>
+
+	<select id="listBoard" resultMap="boardResult" parameterType="java.util.Map">
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingHeaderMySQL" />
+		</if>
+		SELECT
+		SEQ
+		,NAME
+		,DESCRIPTION
+		,DISPLAY_TITLE
+		,HEADER
+		,UPPER_MENU
+		,BOARD_URL
+		,BOARD_TYPE
+		,REPLY_YN
+		,COMMENT_YN
+		,THUMBNAIL_YN
+		,ATTACH_YN
+		,PREV_NEXT_YN
+		,USER_WRITABLE_YN
+		,SECRET_YN
+		,EMAIL_SEND_YN
+		,CATE
+		,LINK_YN
+		,USE_YN
+		,DEL_YN
+		,REG_USER_SEQ
+		,REG_DATE
+		,MOD_USER_SEQ
+		,MOD_DATE
+		,PERF_YN
+		,PERIOD_YN
+		FROM GC_BOARD BOARD
+		<include refid="listBoardCondition"/>
+		ORDER BY SEQ DESC
+		<if test="SKIP_PAGING == false">
+			<include refid="NGCommonSQL.pagingFooterMySQL" />
+		</if>
+	</select>
+
+	<select id="listBoardCnt" resultType="java.lang.Integer" parameterType="java.util.Map">
+		SELECT
+		COUNT(*) AS CNT
+		FROM GC_BOARD  BOARD
+		<include refid="listBoardCondition"/>
+	</select>
+
+	<select id="getUpperMenuGroup" resultMap="boardResult" >
+		SELECT IFNULL(UPPER_MENU,'') UPPER_MENU FROM  GC_BOARD
+		WHERE UPPER_MENU IS NOT NULL AND UPPER_MENU != ''
+		AND DEL_YN = 'N'
+		AND USE_YN = 'Y'
+		GROUP BY UPPER_MENU
+	</select>
+
+
+	<!-- mssql -->
+	<insert id="insert" parameterType="com.nagesoft.postcode.board.model.Board" >
+			INSERT INTO GC_BOARD
+			(
+			NAME
+			,DESCRIPTION
+			,DISPLAY_TITLE
+			,HEADER
+			,UPPER_MENU
+			,BOARD_URL
+			,BOARD_TYPE
+			,REPLY_YN
+			,COMMENT_YN
+			,THUMBNAIL_YN
+			,ATTACH_YN
+			,PREV_NEXT_YN
+			,USER_WRITABLE_YN
+			,SECRET_YN
+			,EMAIL_SEND_YN
+			,CATE
+			,LINK_YN
+			,USE_YN
+			,DEL_YN
+			,REG_USER_SEQ
+			,REG_DATE
+			,PERF_YN
+			,PERIOD_YN
+			)
+			VALUES
+			(
+			#{name, jdbcType=VARCHAR }
+			,#{description, jdbcType=VARCHAR }
+			,#{displayTitle, jdbcType=VARCHAR }
+			,#{header, jdbcType=VARCHAR }
+			,#{upperMenu, jdbcType=VARCHAR }
+			,#{boardURL, jdbcType=VARCHAR }
+			,#{boardType.code, jdbcType=VARCHAR }
+			,#{replyYn, jdbcType=VARCHAR }
+			,#{commentYn, jdbcType=VARCHAR }
+			,#{thumbnailYn, jdbcType=VARCHAR }
+			,#{attachYn, jdbcType=VARCHAR }
+			,#{prevNextYn, jdbcType=VARCHAR }
+			,#{userWritableYn, jdbcType=VARCHAR }
+			,#{secretYn, jdbcType=VARCHAR }
+			,#{emailSendYn, jdbcType=VARCHAR }
+			,#{category, jdbcType=VARCHAR }
+			,#{linkYn, jdbcType=VARCHAR }
+			,#{useYn, jdbcType=VARCHAR }
+			,#{delYn, jdbcType=VARCHAR }
+			,#{regUser.id }
+			,NOW()
+			,#{perfYn, jdbcType=VARCHAR }
+			,#{periodYn, jdbcType=VARCHAR }
+			)
+		<selectKey keyProperty="sequence" order="AFTER" resultType="java.lang.Long">
+		    SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	<!-- mssql -->
+	<update id="update" >
+		UPDATE GC_BOARD
+		SET
+			NAME = #{name, jdbcType=VARCHAR  }
+			,DESCRIPTION = #{description, jdbcType=VARCHAR  }
+			,DISPLAY_TITLE = #{displayTitle, jdbcType=VARCHAR  }
+			,HEADER = #{header, jdbcType=VARCHAR  }
+			,UPPER_MENU = #{upperMenu, jdbcType=VARCHAR   }
+			,REPLY_YN = #{replyYn, jdbcType=VARCHAR  }
+			,BOARD_TYPE = #{boardType.code, jdbcType=VARCHAR  }
+			,COMMENT_YN = #{commentYn, jdbcType=VARCHAR  }
+			,THUMBNAIL_YN = #{thumbnailYn, jdbcType=VARCHAR  }
+			,ATTACH_YN = #{attachYn, jdbcType=VARCHAR  }
+			,PREV_NEXT_YN = #{prevNextYn, jdbcType=VARCHAR  }
+			,USER_WRITABLE_YN = #{userWritableYn, jdbcType=VARCHAR  }
+			,SECRET_YN = #{secretYn, jdbcType=VARCHAR  }
+			,EMAIL_SEND_YN = #{emailSendYn, jdbcType=VARCHAR  }
+			,CATE = #{category, jdbcType=VARCHAR  }
+			,LINK_YN = #{linkYn, jdbcType=VARCHAR  }
+			,USE_YN = #{useYn, jdbcType=VARCHAR  }
+			,MOD_USER_SEQ = #{modUser.id }
+			,MOD_DATE = NOW()
+			,PERF_YN = #{perfYn, jdbcType=VARCHAR  }
+			,PERIOD_YN = #{periodYn, jdbcType=VARCHAR  }
+		WHERE SEQ = #{sequence}
+	</update>
+
+	<update id="delete" parameterType="java.lang.Long">
+		UPDATE GC_BOARD
+		SET
+			DEL_YN = 'Y'
+		WHERE SEQ = #{sequence}
+	</update>
+
+</mapper>

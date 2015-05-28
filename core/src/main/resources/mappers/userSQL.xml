@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nagesoft.postcode.member.dao.UserDAO">
+
+	<resultMap id="userSimpleResultMap" type="user">
+		<id property="sequence" column="USR_SEQ" />
+		<result property="id" column="USR_ID" />
+		<result property="password" column="USR_PWD" />
+		<result property="name" column="USR_NM" />
+		<result property="gender" column="USR_GNDR" />
+		<result property="birthday" column="USR_BIRTHDAY" />
+		<result property="tel" column="USR_TEL" />
+		<result property="group.code" column="USR_GRP" />
+		<result property="church" column="USR_CHR" />
+		<result property="compaction" column="USR_CMPCT" />
+		<result property="visitCount" column="USR_VISIT_CNT" />
+		<result property="regDate" column="USR_REG_DATE" />
+		<result property="managerYN" column="USR_MGR_YN" />
+		<collection property="authorities" ofType="com.nagesoft.postcode.member.model.Role">
+			<id property="sequence" column="RL_SEQ" />
+			<result property="roleType" column="RL_NM"  typeHandler="com.nagesoft.postcode.member.model.handler.RoleTypeEnumHandler"/>
+			<result property="roleCode" column="RL_NM2" />
+		</collection>
+	</resultMap>
+
+	<sql id="defaultCondition">
+		<where>
+		    <if test="searchKeyword != null">
+			    AND (
+			        USR.NM LIKE CONCAT('%', #{searchKeyword}, '%') OR
+			        USR.USR_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+			    )
+		    </if>
+		    <if test='gender != null'>
+			    AND USR.GNDR = #{gender}
+		    </if>
+		    <if test='church != null'>
+			    AND USR.CHR = #{church}
+		    </if>
+
+			<if test="startDate != null and endDate != null">
+				AND USR.REG_DT BETWEEN #{startDate} and #{endDate}
+			</if>
+
+	    </where>
+	</sql>
+
+	<sql id="simpleSelect">
+		SELECT
+			 USR.SEQ  AS USR_SEQ
+			,USR.ID AS USR_ID
+			,USR.PWD AS USR_PWD
+			,USR.NM AS USR_NM
+			,USR.BIRTHDAY AS USR_BIRTHDAY
+			,USR.TEL AS USR_TEL
+			,USR.GRP AS USR_GRP
+			,USR.CHR AS USR_CHR
+			,USR.CMPCT AS USR_CMPCT
+			,USR.VISIT_CNT AS USR_VISIT_CNT
+			,USR.REG_DATE AS USR_REG_DATE
+			,USR.GNDR AS USR_GNDR
+		FROM GC_USR USR
+	</sql>
+
+	<sql id="allSelect">
+		SELECT
+			 USR.SEQ  AS USR_SEQ
+			,USR.ID AS USR_ID
+			,USR.PWD AS USR_PWD
+			,USR.NM AS USR_NM
+			,USR.BIRTHDAY AS USR_BIRTHDAY
+			,USR.TEL AS USR_TEL
+			,USR.GRP AS USR_GRP
+			,USR.CHR AS USR_CHR
+			,USR.CMPCT AS USR_CMPCT
+			,USR.VISIT_CNT AS USR_VISIT_CNT
+			,USR.REG_DATE AS USR_REG_DATE
+			,USR.GNDR AS USR_GNDR
+			,USR.MGR_YN AS USR_MGR_YN
+			,RL.SEQ AS RL_SEQ
+			,RL.USR_ID AS RL_MGR_ID
+			,RL.AUTH_NM AS RL_NM
+			,RL.AUTH_NM AS RL_NM2
+		FROM GC_USR USR
+		LEFT OUTER JOIN GC_USR_ROLE RL
+		ON	RL.USR_ID = USR.SEQ
+	</sql>
+
+	<!-- 목록 조회 -->
+    <select id="getUserList" resultMap="userSimpleResultMap">
+	    <if test="SKIP_PAGING == false">
+		    <include refid="NGCommonSQL.pagingHeaderMySQL" />
+		</if>
+
+	    -- getUserList
+	    <include refid="simpleSelect" />
+
+	    <include refid="defaultCondition" />
+
+	    ORDER BY USR.SEQ DESC
+
+	    <if test="SKIP_PAGING == false">
+		    <include refid="NGCommonSQL.pagingFooterMySQL" />
+		</if>
+    </select>
+
+	<select id="getUserListForExcel" resultType="java.util.Map">
+		<include refid="simpleSelect" />
+
+		<include refid="defaultCondition" />
+
+		ORDER BY USR.SEQ DESC
+	</select>
+
+	<!-- 사용자수 조회 -->
+    <select id="getUserCount" resultType="java.lang.Integer">
+	    -- getUserCount
+	    SELECT COUNT(*)
+	    FROM   GC_USR USR
+
+	    <include refid="defaultCondition" />
+    </select>
+
+	<!-- 사용자(간략) 조회 -->
+    <select id="getUser" resultMap="userSimpleResultMap">
+	    -- getUser
+	    <include refid="allSelect" />
+
+	    WHERE  SEQ = #{sequence}
+    </select>
+
+    <select id="getUserWithPassword" resultMap="userSimpleResultMap">
+        <include refid="allSelect" />
+        WHERE ID = #{id} AND PWD = #{password}
+    </select>
+
+	<select id="getUserWithRole" resultMap="userSimpleResultMap">
+		<include refid="allSelect" />
+		WHERE  ID = #{id}
+	</select>
+
+	<!-- 사용자 중복 체크 -->
+    <select id="getDuplicationIdCount" resultType="java.lang.Integer">
+	    SELECT
+	    	COUNT(*)
+	    FROM GC_USR
+		WHERE ID = #{userID}
+    </select>
+
+	<!-- 아이디 조회(아이디 찾기) -->
+    <select id="getAccount" resultMap="userSimpleResultMap">
+	    SELECT
+	    	ID AS USR_ID
+	    	,NM AS USR_NM
+	    FROM GC_USR
+		WHERE  NM 	= #{name}
+		AND TEL = #{tel}
+    </select>
+
+	<!-- 사용자 삭제 -->
+	<delete id="delete">
+		-- delete
+	    DELETE
+	    FROM   GC_USR
+	    WHERE  SEQ = #{sequence}
+    </delete>
+
+    <insert id="insert" parameterType="user">
+		INSERT INTO GC_USR
+		(
+			ID
+			,PWD
+			,NM
+			,BIRTHDAY
+			,TEL
+			,GRP
+			,CHR
+			,CMPCT
+			,VISIT_CNT
+			,REG_DATE
+			,GNDR
+		) VALUES (
+			#{id}
+			,#{password}
+			,#{name}
+			,#{birthday}
+			,#{tel}
+			,#{group.code}
+			,#{church}
+			,#{compaction}
+			,0
+			,NOW()
+			,#{gender}
+		)
+		<selectKey keyProperty="sequence" order="AFTER" resultType="java.lang.Long">
+		    SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
+
+	<!-- 사용자 수정 -->
+	<update id="update" parameterType="user">
+		-- updateUser
+	    UPDATE GC_USR
+	       SET
+				<if test="password != null">
+					PWD       = #{password}
+
+				</if>
+		        ,NM        = #{name}
+		        ,BIRTHDAY  = #{birthday}
+		        ,TEL       = #{tel}
+		        ,GRP       = #{group.code}
+		        ,CHR       = #{church}
+		        ,CMPCT     = #{compaction}
+		        ,GNDR = #{gender}
+		WHERE SEQ = #{sequence}
+    </update>
+
+    <!-- 사용자 비밀번호 수정 -->
+	<update id="updatePassword" parameterType="user">
+	    UPDATE GC_USR
+	    SET
+			PWD = #{password}
+		WHERE  NM 	= #{name}
+		AND USR_ID 	= #{userID}
+		AND TEL = #{tel}
+    </update>
+
+	<!--방문회수 업데이트-->
+	<update id="updateVisitCount" >
+		UPDATE GC_USR
+		SET
+			VISIT_CNT = VISIT_CNT+1
+		WHERE SEQ = #{sequence}
+	</update>
+</mapper>

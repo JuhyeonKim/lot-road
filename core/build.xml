@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sis-core" default="copyResourceToTest" basedir=".">
+	<property name="testResource" value="${basedir}/src/test/resources/" />
+	<property name="webResource" value="${basedir}/../webapp/src/main/resources" />
+	<target name="copyResourceToTest">
+		<copy todir="${testResource}" overwrite="true">
+			<fileset dir="${basedir}/src/main/resources/">
+				<exclude name="mappers/**" />
+				<exclude name="mybatis/mybatis-config.xml" />
+				<exclude name="spring/**" />
+			</fileset>
+		</copy>
+
+		<!-- webapp resources 복사 -->
+		<copy todir="${testResource}" overwrite="true">
+			<fileset dir="${webResource}/">
+				<include name="config/spring/*.xml" />
+				<include name="config/spring/jdbc.properties" />
+			</fileset>
+		</copy>
+
+        <!--<copy file="${webResource}/mallInterface_dev.properties" tofile="${testResource}/mallInterface.properties" />-->
+	</target>
+
+	<target name="cleanTestResource">
+		<delete includeemptydirs="true">
+            <fileset dir="${testResource}" includes="**/*.properties" />
+			<fileset dir="${testResource}" includes="**/*.xml" />
+		</delete>
+	</target>
+</project>
