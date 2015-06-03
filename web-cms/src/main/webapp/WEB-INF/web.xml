@@ -27,7 +27,6 @@
 			classpath:/config/spring/applicationBeanContext.xml
 			classpath:/config/spring/applicationDaoContext.xml
 			classpath:/config/spring/applicationDataBase.xml
-	        classpath:/config/spring/security.xml
 		</param-value>
   </context-param>
   <filter>
@@ -42,15 +41,6 @@
     <filter-name>encodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-	<!-- Spring security(sitemesh 설정보다 우선) -->
-	<!--<filter>-->
-		<!--<filter-name>springSecurityFilterChain</filter-name>-->
-		<!--<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>-->
-	<!--</filter>-->
-	<!--<filter-mapping>-->
-		<!--<filter-name>springSecurityFilterChain</filter-name>-->
-		<!--<url-pattern>/*</url-pattern>-->
-	<!--</filter-mapping>-->
   <context-param>
     <param-name>sitemesh.configfile</param-name>
     <param-value>/WEB-INF/classes/config/sitemesh/sitemesh.xml</param-value>
