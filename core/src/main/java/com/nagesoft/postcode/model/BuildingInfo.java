@@ -222,6 +222,38 @@ public class BuildingInfo {
     }
 
 
+    public void parseRefLot(String source) {
+
+        String[] sourceArr = source.split(INPUT_DELIMITER);
+
+        // 법정동코드
+        this.legalDongCode = sourceArr[0];
+        // 시도명
+        this.sidoName = sourceArr[1];
+        // 시군구명
+        this.sigunguName = sourceArr[2];
+        // 법정읍면동명
+        this.legalDongName = sourceArr[3];
+        //법정리명
+        this.legalRiName = sourceArr[4];
+        // 산여부
+        this.sanYN = sourceArr[5];
+        // 지번본번(번지)
+        this.lotBasicNumber = Integer.parseInt(sourceArr[6]);
+        // 지번부번(호)
+        this.lotPartNumber = Integer.parseInt(sourceArr[7]);
+        // 도로명코드
+        this.roadCode = sourceArr[8];
+        // 지하 여부
+        this.underYN = sourceArr[9];
+        // 건물 본번
+        this.buildingBasicNumber = Integer.parseInt(sourceArr[10]);
+        // 건물 부번
+        this.buildingPartNumber = Integer.parseInt(sourceArr[11]);
+        // 지번일련번호
+        this.lotSeq = Integer.parseInt(sourceArr[12]);
+
+    }
     public void parseBuildingInfo(String source) {
 
         String[] sourceArr = source.split(INPUT_DELIMITER);

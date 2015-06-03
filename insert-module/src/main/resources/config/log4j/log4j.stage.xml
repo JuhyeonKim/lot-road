@@ -5,7 +5,7 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 	<appender name="BUSINESS" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="file" value="/Volumes/500G/GitHome/nagesoft.com/lot-road/log/business.log"/>
+		<param name="file" value="/Volumes/500G/GitHome/nagesoft.com/lot-road.git/log/business.log"/>
 		<param name="Append" value="true"/>
 		<param name="Encoding" value="UTF-8" />
 		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
@@ -15,7 +15,7 @@
 	</appender>
 
 	<appender name="SQL" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="file" value="/Volumes/500G/GitHome/nagesoft.com/lot-road/log/sql_log.log"/>
+		<param name="file" value="/Volumes/500G/GitHome/nagesoft.com/lot-road.git/log/sql_log.log"/>
 		<param name="Append" value="true"/>
 		<param name="Encoding" value="UTF-8" />
 		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
@@ -31,7 +31,7 @@
 	</appender>
 
 	<logger name="com.nagesoft.postcode" additivity="false">
-		<level value="debug"/>
+		<level value="info"/>
 		<appender-ref ref="BUSINESS"/>
 		<appender-ref ref="CONSOLE"/>
 	</logger>

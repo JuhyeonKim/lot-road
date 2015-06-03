@@ -10,12 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Log4jConfigurer;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by Kimjuhyeon on 15. 5. 19..
@@ -26,6 +25,7 @@ public class Main {
 
     private static Connection connection=null;
     private static PreparedStatement pstmt = null;
+    private static ResultSet rs = null;
     private static String fileEncoding=null, buildingInfoPath = null,refLotPath=null;
 
     public static void main(String[] args) throws IOException {
@@ -37,45 +37,107 @@ public class Main {
 
         Log4jConfigurer.initLogging("classpath:config/log4j/log4j.xml");
 
+        display();
+
+    }
+
+    public static void display() throws IOException {
+
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+        System.out.println("1. Insert Building Info");
+        System.out.println("2. Insert ref-lot info");
+        System.out.println("3. EXIT Program");
+        System.out.println("Press number!");
+
+        BufferedReader br = new BufferedReader((new InputStreamReader(System.in)));
+
+        String s = br.readLine();
+
 
         long startTime = System.currentTimeMillis();
 
-        int result = insertBuildingInfo();
+        int result = 0;
+
+        if (s.equals("1")) {
+            result=insertBuildingInfo();
+        }else if (s.equals("2")) {
+            result=insertRefLot();
+        }else if (s.equals("3")) {
+            System.out.println("It was shut down..");
+            return;
+        }else{
+            display();
+        }
 
         long endTime = System.currentTimeMillis();
-
-        long different = endTime - startTime;
-        long secondsInMilli = 1000;
-        long minutesInMilli = secondsInMilli * 60;
-        long hoursInMilli = minutesInMilli * 60;
-        long daysInMilli = hoursInMilli * 24;
-
-        long elapsedDays = different / daysInMilli;
-        different = different % daysInMilli;
-
-        long elapsedHours = different / hoursInMilli;
-        different = different % hoursInMilli;
-
-        long elapsedMinutes = different / minutesInMilli;
-        different = different % minutesInMilli;
-
-        long elapsedSeconds = different / secondsInMilli;
 
         log.info("------------------------------------------------------------------------");
         log.info("start  : " + format.format(new Date(startTime)));
         log.info("end    : " + format.format(new Date(endTime)));
         log.info("result : " + result);
-//        System.out.printf("%d days, %d hours, %d minutes, %d seconds%n",
-//                elapsedDays,
-//                elapsedHours,
-//                elapsedMinutes,
-//                elapsedSeconds);
         log.info("------------------------------------------------------------------------");
+
 
     }
 
-    public static String getInsertQuery(){
+    /**
+     * Build Info 테이블의 데이터 유무 조회 쿼리
+     * @return 쿼리
+     */
+    public static String getQueryForSelectCountBuildInfo(){
+      String query = "SELECT COUNT(*) as CNT FROM POST_BD_INFO";
+
+        return query;
+    }
+
+    /**
+     * Ref Lot 테이블의 데이터 유무 조회 쿼리
+     * @return 쿼리
+     */
+    public static String getQueryForSelectCountRefLot(){
+      String query = "SELECT COUNT(*) as CNT FROM POST_REF_LOT";
+
+        return query;
+    }
+
+    public static String getInsertQueryForRefLot(){
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("INSERT INTO POST_REF_LOT(");
+        sb.append("        ROAD_CD");
+        sb.append("        ,UNDER_YN");
+        sb.append("        ,BD_BASIC_NUM");
+        sb.append("        ,BD_PART_NUM");
+        sb.append("        ,LOT_SEQ");
+        sb.append("        ,LEGAL_DONG_CD");
+        sb.append("        ,SIDO_NM");
+        sb.append("        ,SIGUNGU_NM");
+        sb.append("        ,LEGAL_DONG_NM");
+        sb.append("        ,LEGAL_RI_NM");
+        sb.append("        ,SAN_YN");
+        sb.append("        ,LOT_BASIC_NUM");
+        sb.append("        ,LOT_PART_NUM");
+        sb.append(") VALUES (");
+        sb.append("        ?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(",?");
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    public static String getInsertQueryForBDInfo(){
 
         StringBuilder sb = new StringBuilder();
 
@@ -123,20 +185,63 @@ public class Main {
 
     public static int insertBuildingInfo() throws IOException {
 
-        File f = new File(buildingInfoPath+"/BD_SEJONG.txt");
+        int result=0;
+
+        try {
+            connection = getConnection();
+
+            pstmt = connection.prepareStatement(getQueryForSelectCountBuildInfo());
+            ResultSet rs = pstmt.executeQuery();
+
+            int dataCount = 0;
+            while (rs.next()) {
+                dataCount = rs.getInt("CNT");
+            }
+
+            if(dataCount == 0) {
+                File f = new File(buildingInfoPath);
 //        File n_f = new File("/Users/Kimjuhyeon/storage/Data/project_data/BD_JEJU_cp.txt");
 
-        int result = 0;
 
-        if (f.isFile()) {
+                if (f.isFile()) {
 
-            result = doInsert(f);
+                    result = doInsertBuildInfo(f);
 
-        }else if(f.isDirectory()){
+                } else if (f.isDirectory()) {
 
-            File[] fArr = f.listFiles();
-            for(File tmpFile : fArr){
-                result += doInsert(tmpFile);
+                    File[] fArr = f.listFiles();
+                    for (File tmpFile : fArr) {
+                        result += doInsertBuildInfo(tmpFile);
+                    }
+                }
+
+            }else{
+                System.out.println("Building info already exists..");
+                display();
+            }
+        } catch (SQLException e) {
+            log.error("Ocurred Exception at insertRefLot!");
+        } catch (ClassNotFoundException e) {
+            log.error("Ocurred Exception at insertRefLot!");
+        }finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                    rs = null;
+
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                    pstmt = null;
+
+                }
+                if (connection != null) {
+                    connection.close();
+                    connection = null;
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -144,7 +249,82 @@ public class Main {
 
     }
 
-    private static int doInsert(File f) throws IOException {
+    /**
+     * 관련 지번 입력 파일 / 디렉토리 구분
+     * @return 입력한 총 개수
+     * @throws IOException
+     */
+    public static int insertRefLot() throws IOException {
+        int result = 0;
+
+
+        try {
+            connection = getConnection();
+
+            pstmt = connection.prepareStatement(getQueryForSelectCountRefLot());
+            rs = pstmt.executeQuery();
+
+            int dataCount = 0;
+            while (rs.next()) {
+                dataCount = rs.getInt("CNT");
+            }
+
+            if (dataCount == 0) {
+
+                File f = new File(refLotPath);
+
+                if (f.isFile()) {
+
+                    result = doInsertRefLot(f);
+
+                } else if (f.isDirectory()) {
+
+                    File[] fArr = f.listFiles();
+                    for (File tmpFile : fArr) {
+                        result += doInsertRefLot(tmpFile);
+                    }
+                }
+
+            }else{
+                System.out.println("Reference Lot-number already exists..");
+                display();
+            }
+        } catch (SQLException e) {
+            log.error("Occurred Exception at insertRefLot!");
+        } catch (ClassNotFoundException e) {
+            log.error("Occurred Exception at insertRefLot!");
+        }finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                    rs = null;
+
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                    pstmt = null;
+
+                }
+                if (connection != null) {
+                    connection.close();
+                    connection = null;
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+
+    }
+
+    /**
+     * RefLot 입력 실행
+     * @param f 입력할  파일
+     * @return 총 입력 행 수
+     * @throws IOException
+     */
+    private static int doInsertRefLot(File f) throws IOException {
 
         String line;
         int rows = 0;
@@ -153,7 +333,100 @@ public class Main {
 
             connection = getConnection();
 
-            pstmt = connection.prepareStatement(getInsertQuery());
+            pstmt = connection.prepareStatement(getInsertQueryForRefLot());
+
+            connection.setAutoCommit(false);
+
+            log.info("Begin Insert!");
+
+
+            FileInputStream fis = new FileInputStream(f);
+//        FileReader fr = new FileReader(f);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis,fileEncoding));
+
+            while ((line = br.readLine()) != null) {
+                BuildingInfo buildingInfo = new BuildingInfo();
+                buildingInfo.parseRefLot(line);
+
+                pstmt.setString(1,buildingInfo.getRoadCode());
+                pstmt.setString(2,buildingInfo.getUnderYN());
+                pstmt.setInt(3, buildingInfo.getBuildingBasicNumber());
+                pstmt.setInt(4, buildingInfo.getBuildingPartNumber());
+                pstmt.setInt(5, buildingInfo.getLotSeq());
+                pstmt.setString(6,buildingInfo.getLegalDongName());
+                pstmt.setString(7,buildingInfo.getSidoName());
+                pstmt.setString(8,buildingInfo.getSigunguName());
+                pstmt.setString(9, buildingInfo.getLegalDongName());
+                pstmt.setString(10, buildingInfo.getLegalRiName());
+                pstmt.setString(11,buildingInfo.getSanYN());
+                pstmt.setInt(12, buildingInfo.getLotBasicNumber());
+                pstmt.setInt(13, buildingInfo.getLotPartNumber());
+
+                pstmt.addBatch();
+                pstmt.clearParameters();
+
+                rows++;
+
+                if ((rows % 10000) == 0) {
+                    pstmt.executeBatch();
+                    pstmt.clearBatch();
+                    connection.commit();
+                    log.info(rows + "Rows Inserted.");
+                }
+            }
+
+            pstmt.executeBatch();
+            connection.commit();
+
+
+
+        }catch(Exception e){
+            e.printStackTrace();
+
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }finally {
+            try {
+
+                if (pstmt != null) {
+                    pstmt.close();
+                    pstmt = null;
+
+                }
+                if (connection != null) {
+                    connection.close();
+                    connection = null;
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return rows;
+
+    }
+
+    /**
+     * BuildInfo 입력 실행
+     * @param f 입력할 파일
+     * @return 총 입력한 행 수
+     * @throws IOException
+     */
+    private static int doInsertBuildInfo(File f) throws IOException {
+
+        String line;
+        int rows = 0;
+
+        try {
+
+            connection = getConnection();
+
+            pstmt = connection.prepareStatement(getInsertQueryForBDInfo());
 
             connection.setAutoCommit(false);
 
@@ -204,6 +477,7 @@ public class Main {
             pstmt.executeBatch();
             connection.commit();
 
+
         }catch(Exception e){
             e.printStackTrace();
 
@@ -211,6 +485,22 @@ public class Main {
                 connection.rollback();
             } catch (SQLException e1) {
                 e1.printStackTrace();
+            }
+        }finally {
+            try {
+                if (pstmt != null) {
+                    pstmt.close();
+                    pstmt = null;
+
+                }
+                if (connection != null) {
+                    connection.close();
+                    connection = null;
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return rows;
