@@ -2,7 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nagesoft.postcode.dao.PostDAO">
     <resultMap id="buildingInfoResult" type="com.nagesoft.postcode.model.BuildingInfo">
-
+        <result property="legalDongName" column="LEGAL_DONG_NM" />
+        <result property="sidoName" column="SIDO_NM" />
+        <result property="sigunguName" column="SIGUNGU_NM" />
+        <result property="legalDongName" column="LEGAL_DONG_NM" />
+        <result property="legalRiName" column="LEGAL_RI_NM" />
+        <result property="sanYN" column="SAN_YN" />
+        <result property="lotBasicNumber" column="LOT_BASIC_NUM" />
+        <result property="lotPartNumber" column="LOT_PART_NUM" />
+        <result property="roadCode" column="ROAD_CD" />
+        <result property="roadName" column="ROAD_NM" />
+        <result property="underYN" column="UNDER_YN" />
+        <result property="buildingBasicNumber" column="BD_BASIC_NUM" />
+        <result property="buildingPartNumber" column="BD_PART_NUM" />
+        <result property="postCode" column="POST_CD" />
+        <result property="sigunguBuildingName" column="SIGUNGU_BD_NM" />
+        <result property="jointYN" column="JOINT_YN" />
     </resultMap>
     <insert id="insertBuildingInfo" parameterType="buildingInfo">
       INSERT INTO POST_BD_INFO(
@@ -75,42 +90,107 @@
         ,#{lotPartNumber}
       )
     </insert>
-    <select id="getList" resultType="buildingInfo">
-        SELECT
-        BD.BD_SEQ
-        ,BD.LEGAL_DONG_CD
-        ,BD.SIDO_NM
-        ,BD.SIGUNGU_NM
-        ,BD.LEGAL_DONG_NM
-        ,BD.LEGAL_RI_NM
-        ,BD.SAN_YN
-        ,BD.LOT_BASIC_NUM
-        ,BD.LOT_PART_NUM
-        ,BD.ROAD_CD
-        ,BD.ROAD_NM
-        ,BD.UNDER_YN
-        ,BD.BD_BASIC_NUM
-        ,BD.BD_PART_NUM
-        ,BD.POST_CD
-        ,BD.SIGUNGU_BD_NM
-        ,BD.JOINT_YN
-        ,LOT.ROAD_CD AS LOT_ROAD_CD
-        ,LOT.LEGAL_DONG_CD AS LOT_LEGAL_DONG_C
-        ,LOT.SIDO_NM AS LOT_SIDO_NM
-        ,LOT.SIGUNGU_NM AS LOT_SIGUNGU_NM
-        ,LOT.LEGAL_DONG_NM AS LOT_LEGAL_DONG_N
-        ,LOT.LEGAL_RI_NM AS LOT_LEGAL_RI_NM
-        ,LOT.SAN_YN AS LOT_SAN_YN
-        ,LOT.LOT_BASIC_NUM AS LOT_LOT_BASIC_NU
-        ,LOT.LOT_PART_NUM AS LOT_LOT_PART_NUM
-        ,LOT.UNDER_YN AS LOT_UNDER_YN
-        ,LOT.BD_BASIC_NUM AS LOT_BD_BASIC_NUM
-        ,LOT.BD_PART_NUM AS LOT_BD_PART_NUM
-        FROM POST_BD_INFO BD
-        LEFT OUTER JOIN POST_REF_LOT LOT
-        ON BD.ROAD_CD = LOT.ROAD_CD
-        AND BD.UNDER_YN = LOT.UNDER_YN
-        AND BD.BD_BASIC_NUM = LOT.BD_BASIC_NUM
-        AND BD.BD_PART_NUM = LOT.BD_PART_NUM
+    <select id="listRoadAddr" resultType="buildingInfo" resultMap="buildingInfoResult">
+        <if test="SKIP_PAGING == false">
+            <include refid="NGCommonSQL.pagingHeaderMySQL" />
+        </if>
+        SELECT SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD FROM (
+            SELECT BD.* FROM POST_BD_INFO BD
+            LEFT OUTER JOIN POST_REF_LOT REF
+            ON BD.ROAD_CD = REF.ROAD_CD
+              AND BD.UNDER_YN = REF.UNDER_YN
+              AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+              AND BD.BD_PART_NUM = REF.BD_PART_NUM
+            <include refid="buildingInfoCondition" />
+                                                                                                                                                      ) AS TMP
+        GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD
+        <if test="SKIP_PAGING == false">
+            <include refid="NGCommonSQL.pagingFooterMySQL" />
+        </if>
     </select>
+    <select id="countRoadAddr" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS CNT FROM (
+            SELECT
+            SIGUNGU_NM,
+            LEGAL_DONG_NM,
+            LEGAL_RI_NM,
+            LOT_BASIC_NUM,
+            LOT_PART_NUM,
+            ROAD_NM,
+            BD_BASIC_NUM,
+            BD_PART_NUM,
+            SIGUNGU_BD_NM,
+            POST_CD
+            FROM (
+                SELECT BD.*
+                FROM POST_BD_INFO BD
+                LEFT OUTER JOIN POST_REF_LOT REF
+                ON BD.ROAD_CD = REF.ROAD_CD
+                AND BD.UNDER_YN = REF.UNDER_YN
+                AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+                AND BD.BD_PART_NUM = REF.BD_PART_NUM
+                <include refid="buildingInfoCondition" />
+            ) AS TMP
+            GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM, LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,
+            SIGUNGU_BD_NM, POST_CD
+        ) CNT_TMP
+    </select>
+
+    <select id="listLotAddr" resultType="buildingInfo" resultMap="buildingInfoResult">
+        <if test="SKIP_PAGING == false">
+            <include refid="NGCommonSQL.pagingHeaderMySQL" />
+        </if>
+        SELECT SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD FROM (
+            SELECT BD.* FROM POST_BD_INFO BD
+            LEFT OUTER JOIN POST_REF_LOT REF
+            ON BD.ROAD_CD = REF.ROAD_CD
+              AND BD.UNDER_YN = REF.UNDER_YN
+              AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+              AND BD.BD_PART_NUM = REF.BD_PART_NUM
+            <include refid="lotCondition" />
+            ) AS TMP
+        GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM,LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,SIGUNGU_BD_NM,POST_CD
+        <if test="SKIP_PAGING == false">
+            <include refid="NGCommonSQL.pagingFooterMySQL" />
+        </if>
+    </select>
+    <select id="countLotAddr" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS CNT FROM (
+          SELECT
+            SIGUNGU_NM,
+            LEGAL_DONG_NM,
+            LEGAL_RI_NM,
+            LOT_BASIC_NUM,
+            LOT_PART_NUM,
+            ROAD_NM,
+            BD_BASIC_NUM,
+            BD_PART_NUM,
+            SIGUNGU_BD_NM,
+            POST_CD
+          FROM (
+                 SELECT BD.*
+                 FROM POST_BD_INFO BD
+                   LEFT OUTER JOIN POST_REF_LOT REF
+                     ON BD.ROAD_CD = REF.ROAD_CD
+                        AND BD.UNDER_YN = REF.UNDER_YN
+                        AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+                        AND BD.BD_PART_NUM = REF.BD_PART_NUM
+                  <include refid="lotCondition" />
+               ) AS TMP
+          GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM, LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,
+            SIGUNGU_BD_NM, POST_CD
+        ) CNT_TMP
+    </select>
+
+    <sql id="buildingInfoCondition">
+        WHERE BD.SIDO_NM = #{sidoName}
+                  AND BD.SIGUNGU_NM = #{sigunguNm}
+                  AND BD.ROAD_NM LIKE CONCAT(#{roadName},'%')
+    </sql>
+    <sql id="lotCondition">
+        WHERE BD.SIDO_NM =  #{sidoName}
+              AND BD.SIGUNGU_NM = #{sigunguName}
+              AND BD.LEGAL_DONG_NM LIKE CONCAT(#{roadName},'%')
+    </sql>
+
 </mapper>

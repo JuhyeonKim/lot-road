@@ -1,5 +1,6 @@
 package com.nagesoft.postcode.dao;
 
+import com.nagesoft.core.mybatis.NGPageable;
 import com.nagesoft.postcode.model.BuildingInfo;
 import org.springframework.stereotype.Repository;
 
@@ -24,8 +25,35 @@ public interface PostDAO {
      */
     void insertRefLot(BuildingInfo buildingInfo);
 
-    List<BuildingInfo> getList(Map<String, Object> param);
+    /**
+     * Count Road Address rows number.
+     * @param param Condition
+     * @return row number
+     */
+    int countRoadAddr(Map<String, Object> param);
+
+    /**
+     * List road Address Info
+     * @param param Condition
+     * @return Data lists.
+     */
+    @NGPageable(countMapperID = "countRoadAddr")
+    List<BuildingInfo> listRoadAddr(Map<String, Object> param);
 
 
+    /**
+     * Count Lot Address rows number.
+     * @param param Condition
+     * @return row number
+     */
+    int countLotAddr(Map<String, Object> param);
+
+    /**
+     * List Lot Address Info
+     * @param param Condition
+     * @return Data lists.
+     */
+    @NGPageable(countMapperID = "countLogAddr")
+    List<BuildingInfo> listLotAddr(Map<String, Object> param);
 
 }
