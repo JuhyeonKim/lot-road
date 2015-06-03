@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nagesoft.postcode.dao.PostDAO">
     <resultMap id="buildingInfoResult" type="com.nagesoft.postcode.model.BuildingInfo">
-        <result property="legalDongName" column="LEGAL_DONG_NM" />
+        <result property="legalDongCode" column="LEGAL_DONG_CD" />
         <result property="sidoName" column="SIDO_NM" />
         <result property="sigunguName" column="SIGUNGU_NM" />
         <result property="legalDongName" column="LEGAL_DONG_NM" />
@@ -19,6 +19,7 @@
         <result property="sigunguBuildingName" column="SIGUNGU_BD_NM" />
         <result property="jointYN" column="JOINT_YN" />
     </resultMap>
+
     <insert id="insertBuildingInfo" parameterType="buildingInfo">
       INSERT INTO POST_BD_INFO(
         BD_SEQ
@@ -104,6 +105,7 @@
             <include refid="buildingInfoCondition" />
                                                                                                                                                       ) AS TMP
         GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD
+        ORDER BY ROAD_NM ASC
         <if test="SKIP_PAGING == false">
             <include refid="NGCommonSQL.pagingFooterMySQL" />
         </if>
@@ -150,6 +152,7 @@
             <include refid="lotCondition" />
             ) AS TMP
         GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM,LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,SIGUNGU_BD_NM,POST_CD
+        ORDER BY LEGAL_DONG_NM ASC, LOT_BASIC_NUM ASC
         <if test="SKIP_PAGING == false">
             <include refid="NGCommonSQL.pagingFooterMySQL" />
         </if>
@@ -183,14 +186,30 @@
     </select>
 
     <sql id="buildingInfoCondition">
-        WHERE BD.SIDO_NM = #{sidoName}
-                  AND BD.SIGUNGU_NM = #{sigunguNm}
-                  AND BD.ROAD_NM LIKE CONCAT(#{roadName},'%')
+      <where>
+          <if test="true">
+              AND BD.SIDO_NM = #{sidoName}
+          </if>
+          <if test="true">
+              AND BD.ROAD_NM LIKE CONCAT(#{roadName},'%')
+          </if>
+          <if test="sigunguName != null">
+              AND BD.SIGUNGU_NM = #{sigunguName}
+          </if>
+      </where>
     </sql>
     <sql id="lotCondition">
-        WHERE BD.SIDO_NM =  #{sidoName}
-              AND BD.SIGUNGU_NM = #{sigunguName}
-              AND BD.LEGAL_DONG_NM LIKE CONCAT(#{roadName},'%')
+        <where>
+            <if test="true">
+                AND BD.SIDO_NM = #{sidoName}
+            </if>
+            <if test="true">
+                AND BD.LEGAL_DONG_NM LIKE CONCAT(#{legalDongName},'%')
+            </if>
+            <if test="sigunguName != null">
+                AND BD.SIGUNGU_NM = #{sigunguName}
+            </if>
+        </where>
     </sql>
 
 </mapper>
