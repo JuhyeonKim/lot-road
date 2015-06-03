@@ -204,7 +204,7 @@
                 AND BD.SIDO_NM = #{sidoName}
             </if>
             <if test="true">
-                AND BD.LEGAL_DONG_NM LIKE CONCAT(#{legalDongName},'%')
+                AND (BD.LEGAL_DONG_NM LIKE CONCAT(#{legalDongName}, '%') OR  BD.LEGAL_RI_NM LIKE CONCAT(#{legalDongName}, '%'))
             </if>
             <if test="sigunguName != null">
                 AND BD.SIGUNGU_NM = #{sigunguName}
