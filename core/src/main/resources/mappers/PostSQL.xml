@@ -95,16 +95,16 @@
         <if test="SKIP_PAGING == false">
             <include refid="NGCommonSQL.pagingHeaderMySQL" />
         </if>
-        SELECT SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD FROM (
+        SELECT <include refid="listColumns" /> FROM (
             SELECT BD.* FROM POST_BD_INFO BD
             LEFT OUTER JOIN POST_REF_LOT REF
             ON BD.ROAD_CD = REF.ROAD_CD
-              AND BD.UNDER_YN = REF.UNDER_YN
-              AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
-              AND BD.BD_PART_NUM = REF.BD_PART_NUM
+            AND BD.UNDER_YN = REF.UNDER_YN
+            AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+            AND BD.BD_PART_NUM = REF.BD_PART_NUM
             <include refid="buildingInfoCondition" />
-                                                                                                                                                      ) AS TMP
-        GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD
+            ) AS TMP
+        GROUP BY <include refid="listColumns" />
         ORDER BY ROAD_NM ASC
         <if test="SKIP_PAGING == false">
             <include refid="NGCommonSQL.pagingFooterMySQL" />
@@ -113,16 +113,7 @@
     <select id="countRoadAddr" resultType="java.lang.Integer">
         SELECT COUNT(*) AS CNT FROM (
             SELECT
-            SIGUNGU_NM,
-            LEGAL_DONG_NM,
-            LEGAL_RI_NM,
-            LOT_BASIC_NUM,
-            LOT_PART_NUM,
-            ROAD_NM,
-            BD_BASIC_NUM,
-            BD_PART_NUM,
-            SIGUNGU_BD_NM,
-            POST_CD
+            <include refid="listColumns" />
             FROM (
                 SELECT BD.*
                 FROM POST_BD_INFO BD
@@ -133,8 +124,7 @@
                 AND BD.BD_PART_NUM = REF.BD_PART_NUM
                 <include refid="buildingInfoCondition" />
             ) AS TMP
-            GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM, LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,
-            SIGUNGU_BD_NM, POST_CD
+            GROUP BY <include refid="listColumns" />
         ) CNT_TMP
     </select>
 
@@ -142,7 +132,7 @@
         <if test="SKIP_PAGING == false">
             <include refid="NGCommonSQL.pagingHeaderMySQL" />
         </if>
-        SELECT SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM, SIGUNGU_BD_NM,POST_CD FROM (
+        SELECT <include refid="listColumns" /> FROM (
             SELECT BD.* FROM POST_BD_INFO BD
             LEFT OUTER JOIN POST_REF_LOT REF
             ON BD.ROAD_CD = REF.ROAD_CD
@@ -151,7 +141,7 @@
               AND BD.BD_PART_NUM = REF.BD_PART_NUM
             <include refid="lotCondition" />
             ) AS TMP
-        GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM,LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,SIGUNGU_BD_NM,POST_CD
+        GROUP BY <include refid="listColumns" />
         ORDER BY LEGAL_DONG_NM ASC, LOT_BASIC_NUM ASC
         <if test="SKIP_PAGING == false">
             <include refid="NGCommonSQL.pagingFooterMySQL" />
@@ -160,16 +150,7 @@
     <select id="countLotAddr" resultType="java.lang.Integer">
         SELECT COUNT(*) AS CNT FROM (
           SELECT
-            SIGUNGU_NM,
-            LEGAL_DONG_NM,
-            LEGAL_RI_NM,
-            LOT_BASIC_NUM,
-            LOT_PART_NUM,
-            ROAD_NM,
-            BD_BASIC_NUM,
-            BD_PART_NUM,
-            SIGUNGU_BD_NM,
-            POST_CD
+        <include refid="listColumns" />
           FROM (
                  SELECT BD.*
                  FROM POST_BD_INFO BD
@@ -180,8 +161,7 @@
                         AND BD.BD_PART_NUM = REF.BD_PART_NUM
                   <include refid="lotCondition" />
                ) AS TMP
-          GROUP BY SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM, LOT_BASIC_NUM, LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,
-            SIGUNGU_BD_NM, POST_CD
+          GROUP BY <include refid="listColumns" />
         ) CNT_TMP
     </select>
     <select id="listSido" resultType="java.lang.String">
@@ -220,6 +200,9 @@
                 AND BD.SIGUNGU_NM = #{sigunguName}
             </if>
         </where>
+    </sql>
+    <sql id="listColumns">
+        SIDO_NM,SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM,LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,SIGUNGU_BD_NM,POST_CD,JOINT_YN
     </sql>
 
 </mapper>

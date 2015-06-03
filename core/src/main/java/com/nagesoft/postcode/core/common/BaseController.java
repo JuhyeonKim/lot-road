@@ -17,18 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.nagesoft.postcode.core.model.LabelValue;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
 import com.nagesoft.postcode.core.Constants;
-import com.nagesoft.core.model.NGAbstractUser;
-import com.nagesoft.core.service.NGUserDetailService;
 
 
 /**
@@ -41,15 +34,7 @@ import com.nagesoft.core.service.NGUserDetailService;
  * @since 1.0
  */
 //@Component(value = "baseController")
-public class BaseController extends AbstractController {
-
-	/**
-	 * 사용자 정보 manager
-	 * <p/>
-	 * 관리자 및 프런트(사용자) 모듈에서 각각 NGUserDetailService를 구현한 객체가 이를 대체한다.
-	 */
-	@Autowired()
-	protected NGUserDetailService manager;
+public class BaseController  {
 
 	/**
 	 * JSON result key
@@ -165,45 +150,5 @@ public class BaseController extends AbstractController {
 		return condMap;
 	}
 
-
-
-	public NGAbstractUser getCurrentUser(boolean forceReloadInCurrentSession) {
-		SecurityContext ctx = SecurityContextHolder.getContext();
-		Authentication auth = ctx.getAuthentication();
-		if (auth == null) {
-			return null;
-		}
-		Object principal = auth.getPrincipal();
-		NGAbstractUser user;
-
-		// the Acegi assigned principal is typically an instance of User
-		// except for certain cases where the user programatically updates
-		// the authentication token (eg users' password) by calling code the
-		// code below in which case the principal will be an instance of
-		// String for the rest of the duration of the current
-		// request-response.
-
-		if (UserDetails.class.isAssignableFrom(principal.getClass())) {
-			if (forceReloadInCurrentSession) {
-				user = manager.getUser(((UserDetails)principal).getUsername());
-			} else {
-				user = (NGAbstractUser)principal;
-			}
-		} else if (principal instanceof String) {
-			if (((String)principal).contains("anonymous")) {
-				user = null;
-			} else {
-				user = manager.getUser((String)principal);
-			}
-		} else {
-			throw new IllegalArgumentException("Unrecognized principal type : " + principal);
-		}
-
-		return user;
-	}
-
-	public NGAbstractUser getCurrentUser() {
-		return getCurrentUser(false);
-	}
 
 }

@@ -207,7 +207,8 @@ public class BuildingInfo {
         }
 
         if(this.legalDongName != null && ! this.legalDongName.equals("")){
-            if(this.jointYN != null && ! this.jointYN.equals("1")){
+            if((this.jointYN != null && this.jointYN.equals("1"))
+                    && (this.sigunguBuildingName != null && !this.sigunguBuildingName.equals(""))){
                 description = (this.legalDongName + ", " + this.sigunguBuildingName);
             }else{
                 description = this.legalDongName;
