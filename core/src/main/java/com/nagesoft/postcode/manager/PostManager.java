@@ -37,8 +37,47 @@ public class PostManager {
 
     }
 
-    public List<BuildingInfo> getList(Map<String, Object> param) {
+    /**
+     * List road Address Info
+     * @param param Condition
+     * @return Data lists.
+     */
+    public List<BuildingInfo> listRoadAddr(Map<String, Object> param) {
 
-        return dao.getList(param);
+        return dao.listRoadAddr(param);
     }
+
+
+    /**
+     * List Lot Address Info
+     * @param param Condition
+     * @return Data lists.
+     */
+    public List<BuildingInfo> listLotAddr(Map<String, Object> param) {
+
+        return dao.listLotAddr(param);
+    }
+
+
+    /**
+     * List SI-DO info.
+     * @param param Condition
+     * @return SI-DO list.
+     */
+    public List<String> listSido(Map<String, Object> param) {
+
+        return dao.listSido(param);
+    }
+
+    /**
+     * List SI-GUN-GU Info.
+     * @param param Condition
+     *              - sidoName
+     * @return SI-GUN-GU list.
+     */
+    public List<Map<String, String>> listSigungu(Map<String, Object> param) {
+
+        return dao.listSigungu(param);
+    }
+
 }

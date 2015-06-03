@@ -56,4 +56,18 @@ public interface PostDAO {
     @NGPageable(countMapperID = "countLogAddr")
     List<BuildingInfo> listLotAddr(Map<String, Object> param);
 
+    /**
+     * List SI-DO info.
+     * @param param Condition
+     * @return SI-DO list.
+     */
+    List<String> listSido(Map<String, Object> param);
+
+    /**
+     * List SI-GUN-GU Info.
+     * @param param Condition
+     *              - sidoName
+     * @return SI-GUN-GU list.
+     */
+    List<Map<String, String>> listSigungu(Map<String, Object> param);
 }

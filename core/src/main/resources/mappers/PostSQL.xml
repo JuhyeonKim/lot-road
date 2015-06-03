@@ -184,6 +184,16 @@
             SIGUNGU_BD_NM, POST_CD
         ) CNT_TMP
     </select>
+    <select id="listSido" resultType="java.lang.String">
+      SELECT SIDO_NM AS sidoName FROM POST_BD_INFO
+      GROUP BY SIDO_NM
+    </select>
+    <select id="listSigungu" resultType="java.util.Map">
+      SELECT SIDO_NM AS sidoName,SIGUNGU_NM AS sigunguName FROM POST_BD_INFO
+        GROUP BY SIDO_NM,SIGUNGU_NM
+        HAVING SIDO_NM = #{sidoName}
+    </select>
+
 
     <sql id="buildingInfoCondition">
       <where>
