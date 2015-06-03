@@ -8,21 +8,16 @@
 	<settings>
 		<setting name="cacheEnabled" value="false" />
 		<setting name="useGeneratedKeys" value="true" />
-		<setting name="defaultExecutorType" value="BATCH" />
+		<setting name="defaultExecutorType" value="REUSE" />
 	</settings>
 
 	<typeAliases>
 		<typeAlias alias="buildingInfo" type="com.nagesoft.postcode.model.BuildingInfo"/>
-		<typeAlias alias="attach" type="com.nagesoft.postcode.common.model.Attach"/>
-		<typeAlias alias="refType" type="com.nagesoft.postcode.common.model.ref.RefType" />
-		<typeAlias type="com.nagesoft.postcode.member.model.User" alias="user" />
-		<typeAlias alias="refTypeEnumHandler" type="com.nagesoft.postcode.common.handler.RefTypeEnumHandler" />
 		<typeAlias alias="nageBooleanTypeHandler" type="com.nagesoft.postcode.core.handler.BooleanTypeHandler" />
 	</typeAliases>
 
 	<typeHandlers>
 		<typeHandler javaType="Boolean" jdbcType="VARCHAR" handler="nageBooleanTypeHandler" />
-		<typeHandler javaType="refType" jdbcType="VARCHAR" handler="refTypeEnumHandler" />
 	</typeHandlers>
 
 </configuration>
