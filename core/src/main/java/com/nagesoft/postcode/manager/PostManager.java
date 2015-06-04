@@ -40,6 +40,10 @@ public class PostManager {
     /**
      * List road Address Info
      * @param param Condition
+     *              - sidoName
+     *              - sigunguName
+     *              - keyword
+     *              - buildingBasicNumber
      * @return Data lists.
      */
     public List<BuildingInfo> listRoadAddr(Map<String, Object> param) {
@@ -51,6 +55,10 @@ public class PostManager {
     /**
      * List Lot Address Info
      * @param param Condition
+     *              - sidoName
+     *              - sigunguName
+     *              - keyword
+     *              - buildingBasicNumber
      * @return Data lists.
      */
     public List<BuildingInfo> listLotAddr(Map<String, Object> param) {

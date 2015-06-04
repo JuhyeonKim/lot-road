@@ -159,8 +159,10 @@ public class Main {
         sb.append("        ,POST_CD");
         sb.append("        ,SIGUNGU_BD_NM");
         sb.append("        ,JOINT_YN");
+        sb.append("        ,BASE_AREA_NUM");
         sb.append(") VALUES (");
         sb.append("?");
+        sb.append(",?");
         sb.append(",?");
         sb.append(",?");
         sb.append(",?");
@@ -460,6 +462,7 @@ public class Main {
                 pstmt.setString(15, buildingInfo.getPostCode());
                 pstmt.setString(16, buildingInfo.getSigunguBuildingName());
                 pstmt.setString(17, buildingInfo.getJointYN());
+                pstmt.setString(18, buildingInfo.getBaseAreaNumber());
 
                 pstmt.addBatch();
                 pstmt.clearParameters();

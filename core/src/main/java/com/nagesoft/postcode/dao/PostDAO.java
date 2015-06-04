@@ -35,6 +35,11 @@ public interface PostDAO {
     /**
      * List road Address Info
      * @param param Condition
+     *              - sidoName
+     *              - sigunguName
+     *              - keyword
+     *              - buildingBasicNumber
+     *              - buildingPartNumber
      * @return Data lists.
      */
     @NGPageable(countMapperID = "countRoadAddr")
@@ -51,6 +56,11 @@ public interface PostDAO {
     /**
      * List Lot Address Info
      * @param param Condition
+     *              - sidoName
+     *              - sigunguName
+     *              - keyword
+     *              - buildingBasicNumber
+     *              - buildingPartNumber
      * @return Data lists.
      */
     @NGPageable(countMapperID = "countLogAddr")

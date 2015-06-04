@@ -3,6 +3,7 @@ package com.nagesoft.postcode.web.controller;
 import com.nagesoft.postcode.core.common.BaseController;
 import com.nagesoft.postcode.manager.PostManager;
 import com.nagesoft.postcode.model.BuildingInfo;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import java.util.Map;
  * 우편번호 관련 컨트롤러
  *
  */
+@Log4j
 @Controller
 @RequestMapping("/postcode")
 public class PostCodeController extends BaseController {
@@ -40,6 +42,29 @@ public class PostCodeController extends BaseController {
         Map<String, Object> param = getQueryMap(request);
         param.put("SKIP_PAGING",true);
 
+        String keyword = param.get("keyword").toString().trim();
+
+        if(keyword != null
+                && keyword.indexOf(" ") > -1){
+            String buildingBasicNumber = keyword.split(" ")[1];
+            keyword = keyword.split(" ")[0];
+
+            if (buildingBasicNumber != null
+                    && buildingBasicNumber.indexOf("-") > -1) {
+                String buildingPartNumber = buildingBasicNumber.split("-")[1];
+                buildingBasicNumber = buildingBasicNumber.split("-")[0];
+
+                param.put("buildingPartNumber", buildingPartNumber);
+            }
+
+            param.put("buildingBasicNumber", buildingBasicNumber);
+
+
+        }
+        param.put("keyword", keyword);
+
+
+
         result = postManager.listRoadAddr(param);
 
         return result;
@@ -49,6 +74,11 @@ public class PostCodeController extends BaseController {
      *
      * @param request HttpServletRequest
      *                검색 조건
+     *                - sidoName
+     *                - sigunguName
+     *                - roadName
+     *                  도로명과, 건물 본번 띄어쓰기로 구분한다
+     *                  예) 대청로 119 -> roadName : 대청로, buildingBasicNumber : 119
      * @return 검색된 주소 결과
      */
     @ResponseBody
@@ -57,9 +87,32 @@ public class PostCodeController extends BaseController {
             List<BuildingInfo> result = null;
 
         Map<String, Object> param = getQueryMap(request);
+
         param.put("SKIP_PAGING",true);
 
-        result = postManager.listRoadAddr(param);
+
+        String keyword = param.get("keyword").toString().trim();
+
+        if(keyword != null
+                && keyword.indexOf(" ") > -1){
+            String buildingBasicNumber = keyword.split(" ")[1];
+            keyword = keyword.split(" ")[0];
+
+            if (buildingBasicNumber != null
+                    && buildingBasicNumber.indexOf("-") > -1) {
+                String buildingPartNumber = buildingBasicNumber.split("-")[1];
+                buildingBasicNumber = buildingBasicNumber.split("-")[0];
+
+                param.put("buildingPartNumber", buildingPartNumber);
+            }
+
+            param.put("buildingBasicNumber", buildingBasicNumber);
+
+
+        }
+        param.put("keyword", keyword);
+
+        result = postManager.listLotAddr(param);
 
         return result;
     }

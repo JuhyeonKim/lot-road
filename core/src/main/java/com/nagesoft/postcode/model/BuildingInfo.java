@@ -131,6 +131,13 @@ public class BuildingInfo {
     private String postCode;
 
     /**
+     * 기초 구역 번호 (새 우편번호)
+     */
+    @Setter
+    @Getter
+    private String baseAreaNumber;
+
+    /**
      * 시군구용 건물명
      */
     @Setter
@@ -172,11 +179,11 @@ public class BuildingInfo {
      * - 법정동만 존재하고 법정 리가 존재 하지 않을 경우<br />
      * - 공동주택일 경우<br />
      * - 법정동, 법정리가 존재할 경우<br />
-     * @return
+     * @return 도로명 주소 리턴
      */
     public String getAddress() {
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         String description = null;
 
@@ -223,6 +230,50 @@ public class BuildingInfo {
     }
 
 
+    public String getLotAddress() {
+
+        StringBuilder sb = new StringBuilder();
+
+
+        sb.append(this.sidoName);
+        sb.append(this.OUTPUT_DELIMITER);
+        sb.append(this.sigunguName);
+
+        if (this.legalRiName != null && !this.legalRiName.equals("")) {
+            sb.append(this.OUTPUT_DELIMITER);
+            sb.append(this.legalDongName);
+            sb.append(this.OUTPUT_DELIMITER);
+            sb.append(this.legalRiName);
+
+        }else{
+            sb.append(this.OUTPUT_DELIMITER);
+            sb.append(this.legalDongName);
+        }
+
+        sb.append(this.OUTPUT_DELIMITER);
+        sb.append(this.lotBasicNumber);
+
+        if (this.lotPartNumber != 0) {
+            sb.append("-");
+            sb.append(this.lotPartNumber);
+        }
+
+        if (this.jointYN.equals("1")) {
+            sb.append(this.OUTPUT_DELIMITER);
+            sb.append(this.sigunguBuildingName);
+        }
+
+
+        return sb.toString();
+    }
+
+    /**
+     * 정해진 형식에 맞게 지번 주소 조회
+     * - 법정동만 존재하고 법정 리가 존재 하지 않을 경우<br />
+     * - 공동주택일 경우<br />
+     * - 법정동, 법정리가 존재할 경우<br />
+     * @return 지번 주소 리턴
+     */
     public void parseRefLot(String source) {
 
         String[] sourceArr = source.split(INPUT_DELIMITER);
@@ -293,9 +344,10 @@ public class BuildingInfo {
         this.sigunguBuildingName = sourceArr[25];
         // 공동주택여부
         this.jointYN = sourceArr[26];
+        // 기초 구역 번호 (새 우편번호)
+        this.baseAreaNumber = sourceArr[27];
 
     }
-
 
     @Override
     public String toString() {
@@ -316,6 +368,7 @@ public class BuildingInfo {
                 ", buildingBasicNumber=" + buildingBasicNumber +
                 ", buildingPartNumber=" + buildingPartNumber +
                 ", postCode='" + postCode + '\'' +
+                ", baseAreaNumber='" + baseAreaNumber + '\'' +
                 ", sigunguBuildingName='" + sigunguBuildingName + '\'' +
                 ", jointYN='" + jointYN + '\'' +
                 ", refLotYn='" + refLotYn + '\'' +

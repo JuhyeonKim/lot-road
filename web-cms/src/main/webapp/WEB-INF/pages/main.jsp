@@ -12,12 +12,11 @@
 </head>
 <body class="bg-black">
 	<div class="col-md-12">
-		<button type="button" id="roadBtn" class="btn btn-sm btn-default" data-toggle="modal" data-target="#roadModal">도로명 우편번호 검색</button>
-		<button type="button" id="lotBtn" class="btn btn-sm btn-default" data-toggle="modal" data-target="#lotModal">지번 우편번호 검색</button>
+		<button type="button" id="roadBtn" class="btn btn-sm btn-default" data-toggle="modal" data-target="#roadModal">주소 검색</button>
 	</div>
 
 	<div class="modal fade" id="roadModal">
-		<div class="modal-dialog">
+		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -35,9 +34,10 @@
 								<select id="sigunguInput" name="q.sigunguName">
 									<option value="">선택</option>
 								</select>
-								<label for="txt">도로명</label>
-								<input id="txt" name="q.roadName" />
-								<button type="submit" id="submitBtn" class="btn btn-sm btn-primary" >검색</button>
+								<label for="txt">도로명 또는 동이름</label>
+								<input id="txt" type="text" name="q.keyword" />
+								<button type="submit" id="submitRoadBtn" class="btn btn-sm btn-primary" >도로명주소로 검색</button>
+								<button type="button" id="submitLotBtn" class="btn btn-sm btn-primary" >지번주소로 검색</button>
 							</div>
 
 						</form>
@@ -45,7 +45,8 @@
 					<table class="table table-responsive table" id="listTable">
 						<colgroup>
 							<col width="10%"/>
-							<col width="30%"/>
+							<col width="15%"/>
+							<col width="15%"/>
 							<col width="30%"/>
 							<col width="30%"/>
 						</colgroup>
@@ -53,13 +54,14 @@
 							<tr>
 								<th>번호</th>
 								<th>우편번호</th>
+								<th>새우편번호</th>
 								<th>도로명</th>
 								<th>지번주소</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-								<td colspan="4" class="text-center">검색하세요.</td>
+								<td colspan="5" class="text-center">검색하세요.</td>
 							</tr>
 						</tbody>
 					</table>
@@ -71,25 +73,6 @@
 			</div><!-- /.modal-content -->
 		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
-	<div class="modal fade" id="lotModal">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title">Modal title</h4>
-				</div>
-				<div class="modal-body">
-					<p>lotModal&hellip;</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-primary">Save changes</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
-
-
 
 
 	<script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js" ></script>
@@ -97,6 +80,20 @@
 	<script type="text/javascript" src="/assets/js/bootstrap/js/bootstrap-growl.min.js" ></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
+
+			$("#submitRoadBtn").bind("click", function () {
+				$("#submitForm").attr("action", "/postcode/listRoad");
+				$("#submitForm").submit();
+
+			});
+
+			$("#submitLotBtn").bind("click", function () {
+				$("#submitForm").attr("action", "/postcode/listLot");
+				$("#submitForm").submit();
+
+			});
+
+
 			$.ajax({
 				url:"/postcode/listSido"
 				,dataType:"json"
@@ -153,16 +150,18 @@
 							var tr = $("<tr />");
 							var td1 = $("<td>"+(i+1)+"</td>");
 							var td2 = $("<td>"+data[i].postCode+"</td>");
-							var td3 = $("<td>"+data[i].address+"</td>");
-							var td4 = $("<td>"+data[i].address);
+							var td3 = $("<td>"+data[i].baseAreaNumber+"</td>");
+							var td4 = $("<td>"+data[i].address+"</td>");
+							var td5 = $("<td>"+data[i].lotAddress+"</td>");
 							tr.append(td1);
 							tr.append(td2);
 							tr.append(td3);
 							tr.append(td4);
+							tr.append(td5);
 							tr.appendTo("#listTable tbody")
 						}
 					}else{
-						$("#listTable tbody").html("검색 결과가 없습니다.");
+						$("#listTable tbody").html("<tr><td colspan='5'>검색 결과가 없습니다.</td></tr>");
 					}
 					console.log(data);
 				}).fail(function(data){

@@ -16,6 +16,7 @@
         <result property="buildingBasicNumber" column="BD_BASIC_NUM" />
         <result property="buildingPartNumber" column="BD_PART_NUM" />
         <result property="postCode" column="POST_CD" />
+        <result property="baseAreaNumber" column="BASE_AREA_NUM" />
         <result property="sigunguBuildingName" column="SIGUNGU_BD_NM" />
         <result property="jointYN" column="JOINT_YN" />
     </resultMap>
@@ -39,6 +40,7 @@
         ,POST_CD
         ,SIGUNGU_BD_NM
         ,JOINT_YN
+        ,BASE_AREA_NUM
       ) VALUES (
         #{buildingSeq,jdbcType=VARCHAR}
         ,#{legalDongCode,jdbcType=VARCHAR}
@@ -57,6 +59,7 @@
         ,#{postCode,jdbcType=VARCHAR}
         ,#{sigunguBuildingName,jdbcType=VARCHAR}
         ,#{jointYN}
+        ,#{baseAreaNumber,jdbcType=VARCHAR}
       )
     </insert>
 
@@ -136,9 +139,9 @@
             SELECT BD.* FROM POST_BD_INFO BD
             LEFT OUTER JOIN POST_REF_LOT REF
             ON BD.ROAD_CD = REF.ROAD_CD
-              AND BD.UNDER_YN = REF.UNDER_YN
-              AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
-              AND BD.BD_PART_NUM = REF.BD_PART_NUM
+            AND BD.UNDER_YN = REF.UNDER_YN
+            AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+            AND BD.BD_PART_NUM = REF.BD_PART_NUM
             <include refid="lotCondition" />
             ) AS TMP
         GROUP BY <include refid="listColumns" />
@@ -156,9 +159,9 @@
                  FROM POST_BD_INFO BD
                    LEFT OUTER JOIN POST_REF_LOT REF
                      ON BD.ROAD_CD = REF.ROAD_CD
-                        AND BD.UNDER_YN = REF.UNDER_YN
-                        AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
-                        AND BD.BD_PART_NUM = REF.BD_PART_NUM
+                     AND BD.UNDER_YN = REF.UNDER_YN
+                     AND BD.BD_BASIC_NUM = REF.BD_BASIC_NUM
+                     AND BD.BD_PART_NUM = REF.BD_PART_NUM
                   <include refid="lotCondition" />
                ) AS TMP
           GROUP BY <include refid="listColumns" />
@@ -181,10 +184,16 @@
               AND BD.SIDO_NM = #{sidoName}
           </if>
           <if test="true">
-              AND BD.ROAD_NM LIKE CONCAT(#{roadName},'%')
+              AND BD.ROAD_NM LIKE CONCAT(#{keyword},'%')
           </if>
           <if test="sigunguName != null">
               AND BD.SIGUNGU_NM = #{sigunguName}
+          </if>
+          <if test="buildingBasicNumber != null">
+              AND BD.BD_BASIC_NUM = #{buildingBasicNumber}
+          </if>
+          <if test="buildingPartNumber != null">
+              AND BD.BD_PART_NUM = #{buildingPartNumber}
           </if>
       </where>
     </sql>
@@ -194,15 +203,21 @@
                 AND BD.SIDO_NM = #{sidoName}
             </if>
             <if test="true">
-                AND (BD.LEGAL_DONG_NM LIKE CONCAT(#{legalDongName}, '%') OR  BD.LEGAL_RI_NM LIKE CONCAT(#{legalDongName}, '%'))
+                AND (BD.LEGAL_DONG_NM LIKE CONCAT(#{keyword}, '%') OR  BD.LEGAL_RI_NM LIKE CONCAT(#{keyword}, '%'))
             </if>
             <if test="sigunguName != null">
                 AND BD.SIGUNGU_NM = #{sigunguName}
             </if>
+            <if test="buildingBasicNumber != null">
+                AND BD.LOT_BASIC_NUM = #{buildingBasicNumber}
+            </if>
+            <if test="buildingPartNumber != null">
+                AND BD.LOT_PART_NUM = #{buildingPartNumber}
+            </if>
         </where>
     </sql>
     <sql id="listColumns">
-        SIDO_NM,SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM,LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,SIGUNGU_BD_NM,POST_CD,JOINT_YN
+        SIDO_NM,SIGUNGU_NM, LEGAL_DONG_NM, LEGAL_RI_NM,LOT_BASIC_NUM,LOT_PART_NUM, ROAD_NM, BD_BASIC_NUM, BD_PART_NUM,SIGUNGU_BD_NM,POST_CD,BASE_AREA_NUM,JOINT_YN
     </sql>
 
 </mapper>
