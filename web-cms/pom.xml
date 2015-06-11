@@ -122,7 +122,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
-		        <finalName>bene-design-admin</finalName>
+		        <finalName>lot-road-web</finalName>
 		        <plugins>
 		            <plugin>
 		                <groupId>org.apache.maven.plugins</groupId>
@@ -152,7 +152,7 @@
 		<profile>
 			<id>stage</id>
 			<build>
-		        <finalName>bene-design-admin</finalName>
+		        <finalName>lot-road-web</finalName>
 		        <plugins>
 		            <plugin>
 		                <groupId>org.apache.maven.plugins</groupId>
@@ -182,7 +182,7 @@
 		<profile>
 			<id>prod</id>
 			<build>
-		        <finalName>bene-design-admin</finalName>
+		        <finalName>lot-road-web</finalName>
 		        <plugins>
 		            <plugin>
 		                <groupId>org.apache.maven.plugins</groupId>

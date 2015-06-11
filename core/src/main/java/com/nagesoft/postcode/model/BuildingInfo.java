@@ -175,6 +175,13 @@ public class BuildingInfo {
     private String INPUT_DELIMITER="\\|";
 
     /**
+     * 변경 사유 코드
+     */
+    @Setter
+    @Getter
+    private String changeCode;
+
+    /**
      * 정해진 형식에 맞게 주소 조회
      * - 법정동만 존재하고 법정 리가 존재 하지 않을 경우<br />
      * - 공동주택일 경우<br />
@@ -340,6 +347,8 @@ public class BuildingInfo {
         this.buildingSeq = sourceArr[15];
         // 우편번호
         this.postCode = sourceArr[19];
+        // 변경 사유 코드
+        this.changeCode = sourceArr[22];
         // 시군구용 건물명
         this.sigunguBuildingName = sourceArr[25];
         // 공동주택여부
