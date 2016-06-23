@@ -16,8 +16,8 @@
 	</context:component-scan>
 
 	<!-- AOP 설정 -->
-	<bean id="pageableBeforeAdvice" class="com.nagesoft.core.mybatis.NGPageableBeforeAdvice" />
-	<bean id="pageableAfterAdvice" class="com.nagesoft.core.mybatis.NGPageableAfterAdvice" />
+	<bean id="pageableBeforeAdvice" class="com.nagesoft.module.core.mybatis.NGPageableBeforeAdvice" />
+	<bean id="pageableAfterAdvice" class="com.nagesoft.module.core.mybatis.NGPageableAfterAdvice" />
 
 	<aop:config expose-proxy="false">
 		<aop:aspect ref="pageableBeforeAdvice">

@@ -11,7 +11,7 @@
 		<property name="maxUploadSize" value="2097152" />
 	</bean>
 
-    <bean class="com.nagesoft.core.NGConfiguration">
+    <bean class="com.nagesoft.module.core.NGConfiguration">
         <constructor-arg value="classpath:config/app.properties" />
     </bean>
 </beans>

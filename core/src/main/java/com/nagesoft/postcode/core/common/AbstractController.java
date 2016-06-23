@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.nagesoft.core.spring.controller.NGControllerForUser;
+import com.nagesoft.module.core.spring.controller.NGControllerForUser;
 import com.nagesoft.postcode.core.model.LabelValue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;

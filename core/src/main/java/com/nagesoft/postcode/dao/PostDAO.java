@@ -1,6 +1,6 @@
 package com.nagesoft.postcode.dao;
 
-import com.nagesoft.core.mybatis.NGPageable;
+import com.nagesoft.module.core.mybatis.NGPageable;
 import com.nagesoft.postcode.model.BuildingInfo;
 import org.springframework.stereotype.Repository;
 

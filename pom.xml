@@ -31,7 +31,7 @@
 	<repositories>
 		<repository>
             <id>nagesoft-public</id>
-            <url>http://nagesoft.com/nexus/content/groups/public</url>
+            <url>http://repo.nagesoft.com/content/groups/public</url>
             <releases>
             </releases>
             <snapshots>
@@ -64,21 +64,15 @@
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
-				<groupId>com.nagesoft</groupId>
-				<artifactId>nage-common</artifactId>
-                <version>1.0.5-SNAPSHOT</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-web</artifactId>
-					</exclusion>
-				</exclusions>
+				<groupId>com.nagesoft.maven</groupId>
+				<artifactId>nage-core</artifactId>
+				<version>1.0.0</version>
 			</dependency>
-            <dependency>
-            	<groupId>com.nagesoft</groupId>
-            	<artifactId>nage-core</artifactId>
-                <version>1.0.12-SNAPSHOT</version>
-            </dependency>
+			<dependency>
+				<groupId>com.nagesoft.maven</groupId>
+				<artifactId>nage-common</artifactId>
+				<version>1.0.0</version>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
@@ -209,10 +203,15 @@
                 <scope>provided</scope>
             </dependency>
 			<!-- TODO: systemScope ???? -->
+			<!--<dependency>-->
+				<!--<groupId>com.naver</groupId>-->
+				<!--<artifactId>lucy-xss</artifactId>-->
+				<!--<version>1.1.2</version>-->
+			<!--</dependency>-->
 			<dependency>
-				<groupId>com.naver</groupId>
-				<artifactId>lucy-xss</artifactId>
-				<version>1.1.2</version>
+				<groupId>com.navercorp.lucy</groupId>
+				<artifactId>lucy-xss-servlet</artifactId>
+				<version>2.0.0</version>
 			</dependency>
 			<dependency>
                 <groupId>org.codehaus.jackson</groupId>

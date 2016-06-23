@@ -55,11 +55,11 @@
             <artifactId>log4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nagesoft</groupId>
+            <groupId>com.nagesoft.maven</groupId>
             <artifactId>nage-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nagesoft</groupId>
+            <groupId>com.nagesoft.maven</groupId>
             <artifactId>nage-core</artifactId>
         </dependency>
         <dependency>
@@ -81,8 +81,8 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.naver</groupId>
-            <artifactId>lucy-xss</artifactId>
+            <groupId>com.navercorp.lucy</groupId>
+            <artifactId>lucy-xss-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>opensymphony</groupId>

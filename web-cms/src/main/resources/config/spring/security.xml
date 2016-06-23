@@ -47,7 +47,7 @@
 
 	<bean id="loginSuccessHandler" class="com.nagesoft.postcode.core.LoginSuccessHandler" />
 
-	<bean id="authProvider" class="com.nagesoft.core.spring.NGMemberAuthenticationProvider">
+	<bean id="authProvider" class="com.nagesoft.module.core.spring.NGMemberAuthenticationProvider">
 		<property name="userDetailService" ref="userManager" />
 	</bean>
 

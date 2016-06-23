@@ -13,11 +13,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.nagesoft</groupId>
+            <groupId>com.nagesoft.maven</groupId>
             <artifactId>nage-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nagesoft</groupId>
+            <groupId>com.nagesoft.maven</groupId>
             <artifactId>nage-common</artifactId>
         </dependency>
         <dependency>

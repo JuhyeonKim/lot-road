@@ -8,7 +8,7 @@ package com.nagesoft.postcode.core.model;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.nagesoft.common.NGStringUtil;
+import com.nagesoft.module.common.NGStringUtil;
 
 /**
  * Email

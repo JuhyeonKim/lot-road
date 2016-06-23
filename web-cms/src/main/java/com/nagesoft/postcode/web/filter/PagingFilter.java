@@ -17,8 +17,8 @@ import org.displaytag.tags.TableTagParameters;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.nagesoft.postcode.core.Constants;
-import com.nagesoft.core.support.NGPagerTool;
-import com.nagesoft.core.support.NGPagination;
+import com.nagesoft.module.core.support.NGPagerTool;
+import com.nagesoft.module.core.support.NGPagination;
 
 
 public class PagingFilter extends OncePerRequestFilter {
